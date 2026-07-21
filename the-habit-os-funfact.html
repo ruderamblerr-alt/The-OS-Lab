@@ -1,0 +1,195 @@
+<html>
+<head>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+  }
+</style>
+</head>
+<body>
+
+<div id="habitos-funfact" style="
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background: #efe6d8;
+  border-radius: 16px;
+  padding: 32px 28px;
+  font-family: Georgia, 'Times New Roman', serif;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+">
+  <div style="
+    font-family: 'Courier New', monospace;
+    letter-spacing: 2px;
+    font-size: 12px;
+    color: #a67c52;
+    text-transform: uppercase;
+  ">
+    — The Habit OS · Fun Fact —
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 16px; flex: 1;">
+    <button id="habitos-prev-btn" style="
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid #c9a86a;
+      background: transparent;
+      color: #a67c52;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    " onmouseover="this.style.background='#c9a86a'; this.style.color='#fff';"
+       onmouseout="this.style.background='transparent'; this.style.color='#a67c52';">
+      ‹
+    </button>
+
+    <div style="
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    ">
+      <div id="habitos-emoji" style="
+        font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Segoe UI Symbol', sans-serif;
+        font-size: 32px;
+        margin-bottom: 12px;
+        transition: opacity 0.4s ease;
+        flex-shrink: 0;
+      ">🧠</div>
+      <div id="habitos-fact-text" class="habitos-scroll" style="
+        font-size: 17px;
+        font-style: italic;
+        color: #2b2117;
+        line-height: 1.5;
+        transition: opacity 0.4s ease;
+        overflow-y: auto;
+        max-height: 130px;
+        padding: 0 8px;
+      ">
+        Loading a nugget of habit wisdom...
+      </div>
+    </div>
+
+    <button id="habitos-next-btn" style="
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid #c9a86a;
+      background: transparent;
+      color: #a67c52;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    " onmouseover="this.style.background='#c9a86a'; this.style.color='#fff';"
+       onmouseout="this.style.background='transparent'; this.style.color='#a67c52';">
+      ›
+    </button>
+  </div>
+
+  <div id="habitos-fact-source" style="
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: #b8a88f;
+    text-transform: uppercase;
+  ">
+    inspired by concepts from Atomic Habits
+  </div>
+</div>
+
+<style>
+  .habitos-scroll::-webkit-scrollbar {
+    width: 5px;
+  }
+  .habitos-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .habitos-scroll::-webkit-scrollbar-thumb {
+    background-color: #c9a86a;
+    border-radius: 10px;
+  }
+  .habitos-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: #a67c52;
+  }
+  .habitos-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #c9a86a transparent;
+  }
+</style>
+
+<script>
+(function() {
+  const facts = [
+    { emoji: "📈", text: "Small daily gains compound hard — a habit that improves just slightly each day can snowball into something dramatically bigger within a year. Same math works in reverse if you're slacking." },
+    { emoji: "🪞", text: "You're not trying to run a marathon. You're trying to become 'a runner.' Every rep is a tiny vote for the person you're becoming." },
+    { emoji: "🧲", text: "Habits that stick are Obvious, Attractive, Easy, and Satisfying. Miss one of the four and your habit ghosts you like a bad Tinder match." },
+    { emoji: "🧊", text: "Progress often stays invisible right up until it isn't. Think of water sitting at 90°F, then 95°, then 99° — still just warm water. One more degree and suddenly it's boiling. Habits work the same way." },
+    { emoji: "⏱️", text: "The Two-Minute Rule: shrink any habit down to something you could do in 120 seconds. 'Read 30 pages' becomes 'read one page.' Tiny is the trick." },
+    { emoji: "🔗", text: "Habit stacking: glue your new habit to one you already do on autopilot. 'After I pour my coffee, I write one sentence.' Free rides are the best rides." },
+    { emoji: "🎯", text: "Chasing goals gets you motivation for a week. Building a system gets you results for a decade. The system is what actually shows up on a random Tuesday when you don't feel like it." },
+    { emoji: "🚫", text: "Life happens and you'll skip a day here and there — that's normal and forgivable. The real danger is letting one skipped day quietly turn into a pattern of skipped days." },
+    { emoji: "🏗️", text: "Environment is basically a silent roommate shaping your choices. Want to snack less? Don't rely on willpower — just hide the chips behind the broccoli." },
+    { emoji: "🏆", text: "Small repeated actions shape identity over time — not because any single one matters much, but because each one nudges you toward becoming someone who just does that thing naturally." }
+  ];
+
+  let currentIndex = 0;
+  const emojiEl = document.getElementById("habitos-emoji");
+  const textEl = document.getElementById("habitos-fact-text");
+
+  function showFact(index) {
+    emojiEl.style.opacity = 0;
+    textEl.style.opacity = 0;
+
+    setTimeout(() => {
+      const fact = facts[index];
+      emojiEl.textContent = fact.emoji;
+      textEl.textContent = fact.text;
+      emojiEl.style.opacity = 1;
+      textEl.style.opacity = 1;
+    }, 400);
+  }
+
+  function nextFact() {
+    currentIndex = (currentIndex + 1) % facts.length;
+    showFact(currentIndex);
+  }
+
+  function prevFact() {
+    currentIndex = (currentIndex - 1 + facts.length) % facts.length;
+    showFact(currentIndex);
+  }
+
+  document.getElementById("habitos-next-btn").addEventListener("click", () => {
+    nextFact();
+    resetTimer();
+  });
+  document.getElementById("habitos-prev-btn").addEventListener("click", () => {
+    prevFact();
+    resetTimer();
+  });
+
+  let timer = setInterval(nextFact, 8000);
+  function resetTimer() {
+    clearInterval(timer);
+    timer = setInterval(nextFact, 8000);
+  }
+
+  showFact(currentIndex);
+})();
+</script>
+
+</body>
+</html>

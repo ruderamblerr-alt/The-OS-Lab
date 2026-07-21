@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Habit OS — Calendar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B1B18;
+    --ink-soft:#4A4842;
+    --paper:#F5F1E6;
+    --paper-alt:#ECE4D2;
+    --brass:#A9824F;
+    --navy:#2B3A42;
+    --line: rgba(27,27,24,0.14);
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html, body{
+    background:var(--paper);
+    font-family:'IBM Plex Mono', monospace;
+    color:var(--ink);
+  }
+
+  .widget{
+    max-width:340px;
+    margin:0 auto;
+    padding:28px 24px;
+  }
+
+  .header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:20px;
+  }
+
+  .month-label{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:500;
+    font-size:1.3rem;
+  }
+
+  .nav-btn{
+    width:26px; height:26px;
+    border-radius:50%;
+    border:1px solid var(--brass);
+    background:none;
+    color:var(--brass);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    font-size:13px;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .nav-btn:hover{ background:var(--brass); color:var(--paper); }
+
+  .weekdays, .days{
+    display:grid;
+    grid-template-columns:repeat(7, 1fr);
+    gap:4px;
+  }
+
+  .weekdays{
+    margin-bottom:8px;
+  }
+  .weekdays span{
+    text-align:center;
+    font-size:10px;
+    letter-spacing:0.08em;
+    color:var(--ink-soft);
+    opacity:0.6;
+  }
+
+  .day{
+    aspect-ratio:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:12.5px;
+    border-radius:50%;
+    color:var(--ink);
+    position:relative;
+  }
+  .day.empty{ visibility:hidden; }
+
+  .day.today{
+    background:var(--navy);
+    color:var(--paper);
+    font-weight:500;
+  }
+
+  .day:not(.today):not(.empty):hover{
+    background:var(--paper-alt);
+    border:1px solid var(--brass);
+    cursor:default;
+  }
+
+  .footer-note{
+    margin-top:18px;
+    text-align:center;
+    font-size:10.5px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--brass);
+  }
+</style>
+</head>
+<body>
+
+<div class="widget">
+  <div class="header">
+    <button class="nav-btn" id="prevBtn">‹</button>
+    <span class="month-label" id="monthLabel">Month Year</span>
+    <button class="nav-btn" id="nextBtn">›</button>
+  </div>
+
+  <div class="weekdays">
+    <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+  </div>
+
+  <div class="days" id="daysGrid"></div>
+
+  <div class="footer-note" id="todayLabel">TODAY</div>
+</div>
+
+<script>
+  let viewDate = new Date();
+  const today = new Date();
+
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  function renderCalendar(){
+    const year = viewDate.getFullYear();
+    const month = viewDate.getMonth();
+
+    document.getElementById('monthLabel').textContent = `${monthNames[month]} ${year}`;
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const grid = document.getElementById('daysGrid');
+    grid.innerHTML = '';
+
+    for (let i = 0; i < firstDay; i++){
+      const empty = document.createElement('div');
+      empty.className = 'day empty';
+      grid.appendChild(empty);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++){
+      const cell = document.createElement('div');
+      cell.className = 'day';
+      cell.textContent = d;
+
+      if (d === today.getDate() && month === today.getMonth() && year === today.getFullYear()){
+        cell.classList.add('today');
+      }
+      grid.appendChild(cell);
+    }
+
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    document.getElementById('todayLabel').textContent =
+      `Today — ${days[today.getDay()]}, ${monthNames[today.getMonth()]} ${today.getDate()}`;
+  }
+
+  document.getElementById('prevBtn').addEventListener('click', () => {
+    viewDate.setMonth(viewDate.getMonth() - 1);
+    renderCalendar();
+  });
+
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    viewDate.setMonth(viewDate.getMonth() + 1);
+    renderCalendar();
+  });
+
+  renderCalendar();
+</script>
+
+</body>
+</html>

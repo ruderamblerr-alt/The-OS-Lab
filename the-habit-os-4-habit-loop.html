@@ -1,0 +1,298 @@
+<html>
+<head>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+  }
+</style>
+</head>
+<body>
+
+<div style="
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background: #efe6d8;
+  border-radius: 16px;
+  padding: 26px 24px;
+  font-family: Georgia, 'Times New Roman', serif;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+">
+  <div style="
+    font-family: 'Courier New', monospace;
+    letter-spacing: 2px;
+    font-size: 12px;
+    color: #a67c52;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 4px;
+  ">
+    — The Habit OS · Learn —
+  </div>
+  <div style="
+    font-size: 22px;
+    font-style: italic;
+    color: #2b2117;
+    text-align: center;
+    margin-bottom: 8px;
+  ">
+    The Habit Loop
+  </div>
+  <div style="
+    font-size: 12.5px;
+    color: #6b5a44;
+    text-align: center;
+    margin-bottom: 14px;
+    line-height: 1.6;
+    padding: 0 6px;
+  ">
+    Every habit, good or bad, is built from the same four-part cycle: a cue triggers a craving, the craving drives a response, and the response delivers a reward. Understanding this loop is the first step to designing habits that actually stick.
+  </div>
+
+  <div id="loop-buttons" style="display: flex; justify-content: space-between; gap: 8px; margin-bottom: 16px;">
+    <button class="loop-btn" data-step="0" style="
+      flex: 1;
+      padding: 12px 4px;
+      border-radius: 12px;
+      border: 1.5px solid #c9a86a;
+      background: #c9a86a;
+      color: #fff;
+      font-family: Georgia, serif;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    ">Cue</button>
+    <button class="loop-btn" data-step="1" style="
+      flex: 1;
+      padding: 12px 4px;
+      border-radius: 12px;
+      border: 1.5px solid #c9a86a;
+      background: transparent;
+      color: #a67c52;
+      font-family: Georgia, serif;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    ">Craving</button>
+    <button class="loop-btn" data-step="2" style="
+      flex: 1;
+      padding: 12px 4px;
+      border-radius: 12px;
+      border: 1.5px solid #c9a86a;
+      background: transparent;
+      color: #a67c52;
+      font-family: Georgia, serif;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    ">Response</button>
+    <button class="loop-btn" data-step="3" style="
+      flex: 1;
+      padding: 12px 4px;
+      border-radius: 12px;
+      border: 1.5px solid #c9a86a;
+      background: transparent;
+      color: #a67c52;
+      font-family: Georgia, serif;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    ">Reward</button>
+  </div>
+
+  <div style="
+    flex: 1;
+    background: #f5ecd9;
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+    overflow-y: auto;
+  ">
+    <div id="step-law" style="
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      color: #fff;
+      background: #c9a86a;
+      text-align: center;
+      text-transform: uppercase;
+      padding: 5px 16px;
+      border-radius: 999px;
+      display: block;
+      width: fit-content;
+      margin: 0 auto 8px auto;
+      transition: opacity 0.3s ease;
+    ">
+      Notice It
+    </div>
+
+    <div id="step-law-sub" style="
+      background: #efe0c4;
+      border: 1px solid #c9a86a;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 12.5px;
+      font-weight: bold;
+      color: #6b4f2a;
+      text-align: center;
+      margin: 0 auto 16px auto;
+      width: fit-content;
+      max-width: 90%;
+      transition: opacity 0.3s ease;
+    ">
+      the signal that starts it all
+    </div>
+
+    <div id="step-emoji" style="font-size: 30px; text-align: center; margin-bottom: 10px; transition: opacity 0.3s ease;">👀</div>
+    <div id="step-title" style="
+      font-size: 19px;
+      font-weight: bold;
+      color: #2b2117;
+      text-align: center;
+      margin-bottom: 8px;
+      transition: opacity 0.3s ease;
+    ">
+      Cue — the trigger
+    </div>
+    <div id="step-concept" style="
+      font-size: 13px;
+      color: #4a3f33;
+      text-align: center;
+      line-height: 1.5;
+      margin-bottom: 12px;
+      transition: opacity 0.3s ease;
+    ">
+      A cue is any signal — external or internal — that tells your brain it's time to start a habit. It's the spark that kicks off the whole loop.
+    </div>
+    <div style="
+      border-top: 1px dashed #d4c3a3;
+      margin: 0 0 10px 0;
+    "></div>
+    <div style="
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      color: #a67c52;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 5px;
+    ">
+      Example
+    </div>
+    <div id="step-example" style="
+      font-size: 13px;
+      font-style: italic;
+      color: #6b5a44;
+      text-align: center;
+      line-height: 1.5;
+      transition: opacity 0.3s ease;
+    ">
+      💧 Drink Water 2L — waking up, and every time you sit back down at your desk after being away.
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const steps = [
+    {
+      emoji: "👀",
+      title: "Cue — the trigger",
+      concept: "A cue is any signal — external or internal — that tells your brain it's time to start a habit. It's the spark that kicks off the whole loop.",
+      example: "💧 Drink Water 2L — waking up, and every time you sit back down at your desk after being away.",
+      law: "Notice It",
+      lawSub: "the signal that starts it all"
+    },
+    {
+      emoji: "🔥",
+      title: "Craving — the motivation",
+      concept: "Craving is the want behind the habit. You're not actually craving the action itself — you're craving the feeling or change in state it promises to deliver.",
+      example: "💧 Drink Water 2L — feeling refreshed and avoiding that sluggish, foggy feeling.",
+      law: "Want It",
+      lawSub: "the pull that makes you actually move"
+    },
+    {
+      emoji: "🏃",
+      title: "Response — the action",
+      concept: "The response is the actual habit you perform. Whether it happens or not usually comes down to one thing: how much friction stands in your way.",
+      example: "💧 Drink Water 2L — drink one full glass of water immediately.",
+      law: "Do It",
+      lawSub: "the moment the habit happens"
+    },
+    {
+      emoji: "🎁",
+      title: "Reward — the payoff",
+      concept: "The reward is what you get out of the habit — satisfaction, relief, or progress. This is what teaches your brain the loop is worth running again.",
+      example: "💧 Drink Water 2L — instant feeling of alertness, plus visible progress toward the 2L mark.",
+      law: "Feel It",
+      lawSub: "the payoff that keeps you coming back"
+    }
+  ];
+
+  const buttons = document.querySelectorAll(".loop-btn");
+  const emojiEl = document.getElementById("step-emoji");
+  const titleEl = document.getElementById("step-title");
+  const conceptEl = document.getElementById("step-concept");
+  const exampleEl = document.getElementById("step-example");
+  const lawEl = document.getElementById("step-law");
+  const lawSubEl = document.getElementById("step-law-sub");
+
+  function setActive(index) {
+    buttons.forEach((btn, i) => {
+      if (i === index) {
+        btn.style.background = "#c9a86a";
+        btn.style.color = "#fff";
+      } else {
+        btn.style.background = "transparent";
+        btn.style.color = "#a67c52";
+      }
+    });
+
+    [lawEl, lawSubEl, emojiEl, titleEl, conceptEl, exampleEl].forEach(el => el.style.opacity = 0);
+
+    setTimeout(() => {
+      const step = steps[index];
+      lawEl.textContent = step.law;
+      lawSubEl.textContent = step.lawSub;
+      emojiEl.textContent = step.emoji;
+      titleEl.textContent = step.title;
+      conceptEl.textContent = step.concept;
+      exampleEl.textContent = step.example;
+      [lawEl, lawSubEl, emojiEl, titleEl, conceptEl, exampleEl].forEach(el => el.style.opacity = 1);
+    }, 200);
+  }
+
+  let autoIndex = 0;
+  let autoTimer;
+
+  function startAutoTimer() {
+    autoTimer = setInterval(() => {
+      autoIndex = (autoIndex + 1) % steps.length;
+      setActive(autoIndex);
+    }, 7000);
+  }
+
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      clearInterval(autoTimer);
+      autoIndex = parseInt(btn.dataset.step);
+      setActive(autoIndex);
+      startAutoTimer();
+    });
+  });
+
+  setActive(0);
+  startAutoTimer();
+})();
+</script>
+
+</body>
+</html>
