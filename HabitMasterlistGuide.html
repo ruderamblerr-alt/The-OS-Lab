@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slider</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Fraunces:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: #FAF6EC;
+    font-family: 'IBM Plex Mono', monospace;
+    overflow: hidden;
+  }
+
+  .title-block {
+    text-align: center;
+    margin-bottom: 18px;
+  }
+
+  .title-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #A98A55;
+    margin-bottom: 6px;
+  }
+
+  .slider-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 34px;
+    color: #2B271F;
+    letter-spacing: 0.015em;
+    line-height: 1.1;
+  }
+
+  .title-rule {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .title-rule span {
+    height: 1px;
+    width: 36px;
+    background: linear-gradient(to right, transparent, #C9B27E);
+  }
+
+  .title-rule span.right {
+    background: linear-gradient(to left, transparent, #C9B27E);
+  }
+
+  .title-rule i {
+    width: 6px;
+    height: 6px;
+    border: 1px solid #A98A55;
+    border-radius: 50%;
+    display: block;
+  }
+
+  .slider-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    max-height: 100vh;
+    background: #FAF6EC;
+    border-radius: 12px;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .track {
+    display: flex;
+    height: 100%;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    touch-action: pan-y;
+  }
+
+  .slide {
+    flex: 0 0 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #F3ECDC;
+  }
+
+  .slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    pointer-events: none;
+  }
+
+  .slide.placeholder {
+    flex-direction: column;
+    gap: 8px;
+    color: #9C9482;
+    font-size: 13px;
+    text-align: center;
+    padding: 24px;
+  }
+
+  .slide.placeholder .num {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 28px;
+    color: #C7BFA9;
+  }
+
+  /* Arrows */
+  .nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(20, 18, 14, 0.55);
+    color: #F4F1EA;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .nav-btn:hover { background: rgba(20, 18, 14, 0.8); }
+  .nav-btn:active { transform: translateY(-50%) scale(0.92); }
+  .nav-btn.prev { left: 12px; }
+  .nav-btn.next { right: 12px; }
+
+  /* Dots */
+  .dots {
+    position: absolute;
+    bottom: 14px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    z-index: 5;
+  }
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(20, 18, 14, 0.25);
+    cursor: pointer;
+    transition: background 0.2s ease, width 0.2s ease;
+  }
+  .dot.active {
+    background: rgba(20, 18, 14, 0.75);
+    width: 18px;
+    border-radius: 3px;
+  }
+
+  /* Counter */
+  .counter {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: rgba(20, 18, 14, 0.55);
+    background: rgba(244, 241, 234, 0.85);
+    padding: 3px 8px;
+    border-radius: 20px;
+    z-index: 5;
+  }
+
+  /* Watermark */
+  .watermark {
+    position: absolute;
+    bottom: 12px;
+    left: 16px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 12px;
+    color: rgba(20, 18, 14, 0.4);
+    letter-spacing: 0.02em;
+    z-index: 5;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="title-block">
+  <div class="title-eyebrow">The Habit OS</div>
+  <h1 class="slider-title">Habit Masterlist Guide</h1>
+  <div class="title-rule"><span></span><i></i><span class="right"></span></div>
+</div>
+<div class="slider-wrap" id="sliderWrap">
+  <div class="counter" id="counter">1 / 1</div>
+  <div class="track" id="track"></div>
+  <button class="nav-btn prev" id="prevBtn" aria-label="Sebelumnya">&#8249;</button>
+  <button class="nav-btn next" id="nextBtn" aria-label="Berikutnya">&#8250;</button>
+  <div class="dots" id="dots"></div>
+  <div class="watermark">the.oslab</div>
+</div>
+
+<script>
+  // ====== GANTI DI SINI ======
+  // Isi array ini dengan nama file gambar kamu (taruh di folder yang sama / subfolder "images/")
+  // Kalau belum ada gambar, biarkan kosong -> akan tampil placeholder otomatis
+  const images = [
+    "https://ruderamblerr-alt.github.io/The-OS-Lab/HabitMasterlistGuide1.png",
+    "https://ruderamblerr-alt.github.io/The-OS-Lab/HabitMasterlistGuide2.png",
+    "https://ruderamblerr-alt.github.io/The-OS-Lab/HabitMasterlistGuide3.png",
+  ];
+  // ============================
+
+  const track = document.getElementById('track');
+  const dotsWrap = document.getElementById('dots');
+  const counterEl = document.getElementById('counter');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+
+  const slideCount = images.length > 0 ? images.length : 3;
+  let current = 0;
+
+  function buildSlides() {
+    track.innerHTML = '';
+    dotsWrap.innerHTML = '';
+
+    for (let i = 0; i < slideCount; i++) {
+      const slide = document.createElement('div');
+      if (images.length > 0) {
+        slide.className = 'slide';
+        const img = document.createElement('img');
+        img.src = images[i];
+        img.alt = 'Slide ' + (i + 1);
+        slide.appendChild(img);
+      } else {
+        slide.className = 'slide placeholder';
+        slide.innerHTML = `<div class="num">${i + 1}</div><div>Ganti array "images" di kode<br>dengan file gambar kamu</div>`;
+      }
+      track.appendChild(slide);
+
+      const dot = document.createElement('div');
+      dot.className = 'dot' + (i === 0 ? ' active' : '');
+      dot.addEventListener('click', () => goTo(i));
+      dotsWrap.appendChild(dot);
+    }
+    update();
+  }
+
+  function update() {
+    track.style.transform = `translateX(-${current * 100}%)`;
+    counterEl.textContent = `${current + 1} / ${slideCount}`;
+    [...dotsWrap.children].forEach((d, i) => d.classList.toggle('active', i === current));
+  }
+
+  function goTo(index) {
+    current = Math.max(0, Math.min(slideCount - 1, index));
+    update();
+  }
+
+  prevBtn.addEventListener('click', () => goTo(current - 1));
+  nextBtn.addEventListener('click', () => goTo(current + 1));
+
+  let startX = 0;
+  let isDragging = false;
+
+  track.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+    isDragging = true;
+  }, { passive: true });
+
+  track.addEventListener('touchend', (e) => {
+    if (!isDragging) return;
+    const endX = e.changedTouches[0].clientX;
+    const diff = endX - startX;
+    if (diff > 40) goTo(current - 1);
+    else if (diff < -40) goTo(current + 1);
+    isDragging = false;
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') goTo(current - 1);
+    if (e.key === 'ArrowRight') goTo(current + 1);
+  });
+
+  buildSlides();
+</script>
+
+</body>
+</html>
