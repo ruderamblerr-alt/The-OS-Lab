@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Langkah Kecil — Clock</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;1,500;1,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --charcoal:#1C1A18;
+    --charcoal-soft:#242220;
+    --cream:#EDE6D8;
+    --warm-gray:#6B655C;
+    --sage:#8FA896;
+    --terracotta:#B0715A;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html, body{ height:100%; background:transparent; }
+  body{
+    font-family:'IBM Plex Mono', monospace;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  .clock-card{
+    position:relative;
+    width:100%;
+    max-width:480px;
+    background:var(--charcoal);
+    border-radius:18px;
+    padding:36px 30px 28px;
+    overflow:hidden;
+    text-align:center;
+  }
+
+  /* subtle grain texture, echoes the Instagram post background */
+  .clock-card::before{
+    content:'';
+    position:absolute; inset:0;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(237,230,216,0.035) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(237,230,216,0.03) 0%, transparent 45%);
+    pointer-events:none;
+  }
+
+  .date-label{
+    position:relative;
+    font-size:11px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--warm-gray);
+    margin-bottom:22px;
+  }
+
+  .time{
+    position:relative;
+    font-size:clamp(2.6rem, 9vw, 3.6rem);
+    font-weight:500;
+    color:var(--cream);
+    letter-spacing:0.02em;
+    line-height:1;
+    display:flex;
+    align-items:baseline;
+    justify-content:center;
+    gap:2px;
+  }
+  .time .sec{
+    font-size:0.5em;
+    color:var(--sage);
+    margin-left:6px;
+    font-weight:500;
+  }
+
+  .tagline{
+    position:relative;
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:14px;
+    color:var(--sage);
+    margin:16px 0 26px;
+  }
+
+  /* the "steps" track — one dot per second, echoes "Langkah Kecil" literally */
+  .steps-track{
+    position:relative;
+    display:flex;
+    justify-content:center;
+    gap:4px;
+    flex-wrap:wrap;
+    max-width:380px;
+    margin:0 auto;
+  }
+  .step-dot{
+    width:5px; height:5px;
+    border-radius:50%;
+    background: rgba(237,230,216,0.14);
+    transition: background 0.25s ease, transform 0.25s ease;
+  }
+  .step-dot.done{
+    background: var(--sage);
+  }
+  .step-dot.current{
+    background: var(--terracotta);
+    transform: scale(1.6);
+  }
+
+  .brand-mark{
+    position:relative;
+    margin-top:26px;
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:12px;
+    color:var(--warm-gray);
+    letter-spacing:0.02em;
+  }
+  .brand-mark b{
+    color:var(--sage);
+    font-style:normal;
+    font-weight:600;
+  }
+</style>
+</head>
+<body>
+
+<div class="clock-card">
+  <div class="date-label" id="dateLabel">—</div>
+  <div class="time">
+    <span id="hh">00</span>:<span id="mm">00</span><span class="sec">:<span id="ss">00</span></span>
+  </div>
+  <div class="tagline">satu detik, satu langkah.</div>
+  <div class="steps-track" id="stepsTrack"></div>
+  <div class="brand-mark"><b>Lk</b> — langkah kecil</div>
+</div>
+
+<script>
+  const track = document.getElementById('stepsTrack');
+  for (let i = 0; i < 60; i++){
+    const dot = document.createElement('div');
+    dot.className = 'step-dot';
+    dot.dataset.i = i;
+    track.appendChild(dot);
+  }
+  const dots = [...track.children];
+
+  const dayNames = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+  const monthNames = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+
+  function pad(n){ return n.toString().padStart(2, '0'); }
+
+  function tick(){
+    const now = new Date();
+    document.getElementById('hh').textContent = pad(now.getHours());
+    document.getElementById('mm').textContent = pad(now.getMinutes());
+    document.getElementById('ss').textContent = pad(now.getSeconds());
+
+    document.getElementById('dateLabel').textContent =
+      `${dayNames[now.getDay()]}, ${now.getDate()} ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+
+    const sec = now.getSeconds();
+    dots.forEach((d, i) => {
+      d.classList.remove('done', 'current');
+      if (i < sec) d.classList.add('done');
+      if (i === sec) d.classList.add('current');
+    });
+  }
+
+  tick();
+  setInterval(tick, 1000);
+</script>
+
+</body>
+</html>

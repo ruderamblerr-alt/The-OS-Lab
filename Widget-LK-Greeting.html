@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Langkah Kecil — Greeting</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;1,500;1,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --charcoal:#1C1A18;
+    --cream:#EDE6D8;
+    --warm-gray:#6B655C;
+    --sage:#8FA896;
+    --terracotta:#B0715A;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html, body{ height:100%; background:transparent; }
+  body{
+    font-family:'IBM Plex Mono', monospace;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  .greet-card{
+    position:relative;
+    width:100%;
+    max-width:480px;
+    background:var(--charcoal);
+    border-radius:18px;
+    padding:40px 34px 32px;
+    overflow:hidden;
+  }
+  .greet-card::before{
+    content:'';
+    position:absolute; inset:0;
+    background-image:
+      radial-gradient(circle at 18% 25%, rgba(237,230,216,0.035) 0%, transparent 40%),
+      radial-gradient(circle at 82% 75%, rgba(237,230,216,0.03) 0%, transparent 45%);
+    pointer-events:none;
+  }
+
+  .greet-eyebrow{
+    position:relative;
+    font-size:11px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--warm-gray);
+    margin-bottom:16px;
+  }
+
+  .greet-main{
+    position:relative;
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:500;
+    font-size:clamp(1.8rem, 6vw, 2.4rem);
+    color:var(--cream);
+    line-height:1.2;
+    margin-bottom:22px;
+  }
+  .greet-main em{ color:var(--sage); font-style:italic; }
+
+  .greet-divider{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:20px;
+  }
+  .greet-divider span{
+    height:1px; width:28px;
+    background: linear-gradient(to right, var(--terracotta), transparent);
+  }
+  .greet-divider i{
+    width:5px; height:5px;
+    border-radius:50%;
+    background:var(--terracotta);
+    display:block;
+  }
+
+  .greet-message{
+    position:relative;
+    font-size:14.5px;
+    color:var(--cream);
+    line-height:1.7;
+    opacity:0.9;
+    max-width:400px;
+  }
+
+  .greet-footer{
+    position:relative;
+    margin-top:28px;
+    padding-top:16px;
+    border-top:1px solid rgba(237,230,216,0.08);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .greet-date{
+    font-size:11px;
+    color:var(--warm-gray);
+    letter-spacing:0.04em;
+  }
+  .brand-mark{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:12px;
+    color:var(--warm-gray);
+  }
+  .brand-mark b{ color:var(--sage); font-style:normal; font-weight:600; }
+</style>
+</head>
+<body>
+
+<div class="greet-card">
+  <div class="greet-eyebrow" id="greetEyebrow">—</div>
+  <div class="greet-main" id="greetMain">Selamat <em>datang</em>.</div>
+  <div class="greet-divider"><span></span><i></i><span></span></div>
+  <div class="greet-message" id="greetMessage">—</div>
+  <div class="greet-footer">
+    <span class="greet-date" id="greetDate">—</span>
+    <span class="brand-mark"><b>Lk</b> — langkah kecil</span>
+  </div>
+</div>
+
+<script>
+  const dayNames = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+  const monthNames = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+
+  // ====== GANTI DI SINI kalau mau pakai nama ======
+  const userName = ""; // isi misal "Dzikri" kalau mau greeting personal, kosongkan kalau tidak
+  // =================================================
+
+  function getTimeGreeting(hour){
+    if (hour >= 4 && hour < 11) return { label: "Selamat pagi", em: "pagi" };
+    if (hour >= 11 && hour < 15) return { label: "Selamat siang", em: "siang" };
+    if (hour >= 15 && hour < 18) return { label: "Selamat sore", em: "sore" };
+    return { label: "Selamat malam", em: "malam" };
+  }
+
+  const dailyMessages = [
+    "Kamu tidak perlu langkah besar hari ini. Cukup satu yang konsisten.",
+    "Konsistensi bukan soal sempurna. Soal kembali lagi, meski kecil.",
+    "Kalau hari ini terasa berat, itu bukan tanda kamu gagal — itu tanda kamu sedang mencoba.",
+    "Satu langkah kecil hari ini, cukup untuk menjaga arah tetap benar.",
+    "Kamu tidak tertinggal. Kamu sedang berjalan dengan ritme sendiri.",
+    "Progress tidak selalu terlihat. Tapi ia sedang bekerja, diam-diam.",
+    "Hari ini cukup: bangun, coba, dan tidak menyerah.",
+    "Kebiasaan baik dibangun pelan-pelan, bukan dengan tergesa.",
+    "Kamu tidak harus merasa termotivasi untuk tetap konsisten.",
+    "Satu hal kecil yang kamu selesaikan hari ini, tetap terhitung.",
+    "Istirahat bukan mundur. Kadang itu bagian dari jalan.",
+    "Yang kamu ulangi hari ini, perlahan menjadi dirimu besok.",
+    "Tidak apa jika pelan. Yang penting terus bergerak.",
+    "Kamu sedang menanam sesuatu yang belum kelihatan hasilnya. Lanjutkan.",
+    "Konsistensi kecil, kalau diulang, jadi perubahan besar.",
+    "Hari yang biasa saja, tetap bisa jadi langkah maju.",
+    "Kamu tidak perlu jadi versi sempurna hari ini. Cukup versi yang mencoba.",
+    "Rutinitas kecil hari ini adalah investasi untuk dirimu nanti.",
+    "Tidak semua hari harus produktif. Cukup jujur dan hadir.",
+    "Setiap langkah kecil punya alasan untuk dirayakan.",
+    "Kamu boleh lelah. Tapi jangan berhenti sepenuhnya.",
+    "Yang kamu bangun sekarang, belum tentu terlihat — tapi nyata.",
+    "Progress bukan garis lurus. Kadang naik, kadang diam sebentar.",
+    "Satu kebiasaan baik hari ini, cukup untuk menjaga arah.",
+    "Kamu tidak butuh alasan besar untuk memulai. Cukup mulai saja.",
+    "Hari ini, cukup jadi sedikit lebih baik dari kemarin.",
+    "Langkah kecil yang konsisten, mengalahkan langkah besar yang jarang.",
+    "Kadang yang kamu butuh bukan motivasi, tapi sistem yang membawamu jalan.",
+    "Kamu sedang belajar, bukan gagal.",
+    "Teruskan. Bahkan versi paling pelan darimu, tetap bergerak maju."
+  ];
+
+  function dayOfYear(date){
+    const start = new Date(date.getFullYear(), 0, 0);
+    const diff = date - start;
+    return Math.floor(diff / (1000 * 60 * 60 * 24));
+  }
+
+  function render(){
+    const now = new Date();
+    const greeting = getTimeGreeting(now.getHours());
+
+    document.getElementById('greetEyebrow').textContent = "Langkah Kecil";
+    document.getElementById('greetMain').innerHTML =
+      userName ? `${greeting.label}, <em>${userName}</em>.` : `${greeting.label}.`;
+
+    const idx = dayOfYear(now) % dailyMessages.length;
+    document.getElementById('greetMessage').textContent = dailyMessages[idx];
+
+    document.getElementById('greetDate').textContent =
+      `${dayNames[now.getDay()]}, ${now.getDate()} ${monthNames[now.getMonth()]}`;
+  }
+
+  render();
+  setInterval(render, 60000);
+</script>
+
+</body>
+</html>

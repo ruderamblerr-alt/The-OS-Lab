@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Langkah Kecil — Kalender</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;1,500;1,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --charcoal:#1C1A18;
+    --cream:#EDE6D8;
+    --warm-gray:#6B655C;
+    --sage:#8FA896;
+    --terracotta:#B0715A;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html, body{ height:100%; background:transparent; }
+  body{
+    font-family:'IBM Plex Mono', monospace;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  .cal-card{
+    position:relative;
+    width:100%;
+    max-width:420px;
+    background:var(--charcoal);
+    border-radius:18px;
+    padding:30px 26px 26px;
+    overflow:hidden;
+  }
+  .cal-card::before{
+    content:'';
+    position:absolute; inset:0;
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(237,230,216,0.035) 0%, transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(237,230,216,0.03) 0%, transparent 45%);
+    pointer-events:none;
+  }
+
+  .cal-header{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:22px;
+  }
+  .cal-month{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:500;
+    font-size:22px;
+    color:var(--cream);
+  }
+  .cal-month b{ color:var(--sage); font-style:normal; font-weight:600; }
+  .cal-nav{ display:flex; gap:8px; }
+  .cal-nav button{
+    width:26px; height:26px;
+    border-radius:50%;
+    border:1px solid rgba(237,230,216,0.2);
+    background:transparent;
+    color:var(--cream);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+  .cal-nav button:hover{ border-color:var(--sage); color:var(--sage); }
+
+  .cal-grid{
+    position:relative;
+    display:grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap:6px;
+  }
+  .cal-dow{
+    font-size:10px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--warm-gray);
+    text-align:center;
+    padding-bottom:8px;
+  }
+  .cal-day{
+    aspect-ratio:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    color:var(--cream);
+    border-radius:8px;
+    position:relative;
+  }
+  .cal-day.empty{ visibility:hidden; }
+  .cal-day.weekend{ color: rgba(143,168,150,0.75); }
+  .cal-day.today{
+    background:var(--terracotta);
+    color:var(--charcoal);
+    font-weight:600;
+  }
+  .cal-day.today::after{
+    content:'';
+    position:absolute;
+    bottom:3px;
+    width:3px; height:3px;
+    border-radius:50%;
+    background:var(--charcoal);
+  }
+
+  .cal-footer{
+    position:relative;
+    margin-top:22px;
+    padding-top:16px;
+    border-top:1px solid rgba(237,230,216,0.08);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .cal-tagline{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:12px;
+    color:var(--sage);
+  }
+  .brand-mark{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:12px;
+    color:var(--warm-gray);
+  }
+  .brand-mark b{ color:var(--sage); font-style:normal; font-weight:600; }
+</style>
+</head>
+<body>
+
+<div class="cal-card">
+  <div class="cal-header">
+    <div class="cal-month" id="calMonth">— —</div>
+    <div class="cal-nav">
+      <button id="prevBtn" aria-label="Bulan sebelumnya">‹</button>
+      <button id="nextBtn" aria-label="Bulan berikutnya">›</button>
+    </div>
+  </div>
+  <div class="cal-grid" id="calGrid"></div>
+  <div class="cal-footer">
+    <span class="cal-tagline">satu langkah, satu hari.</span>
+    <span class="brand-mark"><b>Lk</b></span>
+  </div>
+</div>
+
+<script>
+  const monthNames = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+  const dowNames = ["M","S","S","R","K","J","S"];
+
+  let viewDate = new Date();
+  viewDate.setDate(1);
+
+  const grid = document.getElementById('calGrid');
+  const monthLabel = document.getElementById('calMonth');
+
+  function render(){
+    grid.innerHTML = '';
+    dowNames.forEach(d => {
+      const el = document.createElement('div');
+      el.className = 'cal-dow';
+      el.textContent = d;
+      grid.appendChild(el);
+    });
+
+    const year = viewDate.getFullYear();
+    const month = viewDate.getMonth();
+    const firstDow = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const today = new Date();
+    const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+
+    monthLabel.innerHTML = `${monthNames[month]} <b>${year}</b>`;
+
+    for (let i = 0; i < firstDow; i++){
+      const empty = document.createElement('div');
+      empty.className = 'cal-day empty';
+      grid.appendChild(empty);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++){
+      const cell = document.createElement('div');
+      const dow = new Date(year, month, d).getDay();
+      cell.className = 'cal-day' + (dow === 0 || dow === 6 ? ' weekend' : '');
+      if (isCurrentMonth && d === today.getDate()) cell.classList.add('today');
+      cell.textContent = d;
+      grid.appendChild(cell);
+    }
+  }
+
+  document.getElementById('prevBtn').addEventListener('click', () => {
+    viewDate.setMonth(viewDate.getMonth() - 1);
+    render();
+  });
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    viewDate.setMonth(viewDate.getMonth() + 1);
+    render();
+  });
+
+  render();
+</script>
+
+</body>
+</html>

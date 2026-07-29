@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Langkah Kecil — Kenapa Kebiasaan Bisa Diukur</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,500;1,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --charcoal:#1C1A18;
+    --cream:#EDE6D8;
+    --warm-gray:#6B655C;
+    --sage:#8FA896;
+    --terracotta:#B0715A;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; user-select:none; -webkit-user-select:none; }
+  html, body{ height:100%; background:transparent; }
+  body{
+    font-family:'IBM Plex Mono', monospace;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  .card{
+    position:relative;
+    width:100%;
+    max-width:560px;
+    background:var(--charcoal);
+    border-radius:20px;
+    padding:38px 34px 30px;
+    overflow:hidden;
+  }
+  .card::before{
+    content:'';
+    position:absolute; inset:0;
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(237,230,216,0.035) 0%, transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(237,230,216,0.03) 0%, transparent 45%);
+    pointer-events:none;
+  }
+
+  .eyebrow{
+    position:relative;
+    font-size:11px; letter-spacing:0.18em; text-transform:uppercase;
+    color:var(--warm-gray); margin-bottom:14px;
+  }
+  .title{
+    position:relative;
+    font-family:'Fraunces', serif; font-style:italic; font-weight:500;
+    font-size:clamp(1.4rem, 5vw, 1.85rem);
+    color:var(--cream); line-height:1.25; margin-bottom:28px;
+    max-width:460px;
+  }
+  .title em{ color:var(--sage); font-style:italic; }
+
+  /* the footstep path */
+  .path-zone{
+    position:relative;
+    height:90px;
+    display:flex;
+    align-items:flex-end;
+    gap:6px;
+    margin-bottom:8px;
+    padding:0 4px;
+  }
+  .foot{
+    flex:1;
+    border-radius:5px;
+    background: var(--terracotta);
+    transition: height 0.35s ease, opacity 0.35s ease, background 0.35s ease, transform 0.35s ease;
+    transform-origin:bottom;
+  }
+
+  .track-wrap{
+    position:relative;
+    margin:6px 4px 22px;
+  }
+  .track{
+    position:relative;
+    height:4px;
+    border-radius:4px;
+    background: rgba(237,230,216,0.12);
+    cursor: pointer;
+  }
+  .track-fill{
+    position:absolute; left:0; top:0; bottom:0;
+    border-radius:4px;
+    background: linear-gradient(to right, var(--terracotta), var(--sage));
+    width:0%;
+    pointer-events:none;
+  }
+  .handle{
+    position:absolute;
+    top:50%;
+    width:20px; height:20px;
+    border-radius:50%;
+    background:var(--cream);
+    border:3px solid var(--charcoal);
+    box-shadow: 0 0 0 1px rgba(237,230,216,0.3);
+    transform: translate(-50%, -50%);
+    left:0%;
+    cursor: grab;
+    transition: left 0.35s ease;
+  }
+  .handle:active{ cursor: grabbing; }
+
+  .readout{
+    position:relative;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    margin-bottom:22px;
+  }
+  .readout-label{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:600;
+    font-size:20px;
+    color:var(--sage);
+    transition: color 0.3s ease;
+  }
+  .readout-score{
+    font-size:13px;
+    color:var(--warm-gray);
+  }
+  .readout-score b{ color:var(--cream); font-size:15px; }
+
+  .desc{
+    position:relative;
+    font-size:14px;
+    color:var(--cream);
+    opacity:0.9;
+    line-height:1.65;
+    min-height:44px;
+    max-width:460px;
+    transition: opacity 0.25s ease;
+  }
+
+  .hint{
+    position:relative;
+    margin-top:20px;
+    padding-top:16px;
+    border-top:1px solid rgba(237,230,216,0.08);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .hint span:first-child{
+    font-size:11px;
+    color:var(--warm-gray);
+    letter-spacing:0.04em;
+  }
+  .brand-mark{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:12px;
+    color:var(--warm-gray);
+  }
+  .brand-mark b{ color:var(--sage); font-style:normal; font-weight:600; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="eyebrow">Langkah Kecil · Kenapa kebiasaan bisa diukur</div>
+  <div class="title">Geser buat lihat: kebiasaan yang sama, tapi <em>rasanya beda.</em></div>
+
+  <div class="path-zone" id="pathZone"></div>
+
+  <div class="track-wrap">
+    <div class="track" id="track">
+      <div class="track-fill" id="trackFill"></div>
+      <div class="handle" id="handle"></div>
+    </div>
+  </div>
+
+  <div class="readout">
+    <div class="readout-label" id="readoutLabel">Masih berat</div>
+    <div class="readout-score">skor otomatisitas <b id="readoutScore">15</b></div>
+  </div>
+
+  <div class="desc" id="desc">Tiap langkah masih terasa berat. Kamu masih harus benar-benar mendorong diri sendiri untuk melakukannya.</div>
+
+  <div class="hint">
+    <span>geser titiknya →</span>
+    <span class="brand-mark"><b>Lk</b> — langkah kecil</span>
+  </div>
+</div>
+
+<script>
+  const zones = [
+    { max: 20, label: "Masih berat", desc: "Tiap langkah masih terasa berat. Kamu masih harus benar-benar mendorong diri sendiri untuk melakukannya." },
+    { max: 40, label: "Masih perlu diingatkan", desc: "Sudah mulai jalan, tapi masih butuh pengingat atau niat sadar tiap kali mau melakukannya." },
+    { max: 60, label: "Mulai terbiasa", desc: "Sudah terasa lebih ringan, meski masih ada bagian dari kamu yang sadar sedang 'melakukan' ini." },
+    { max: 80, label: "Hampir otomatis", desc: "Sudah jarang terasa seperti usaha. Kamu mulai melakukannya tanpa perlu banyak berpikir." },
+    { max: 101, label: "Sudah otomatis", desc: "Ini sudah jadi bagian dari dirimu. Tidak perlu dorongan, tidak perlu diingatkan — ia berjalan sendiri." }
+  ];
+
+  const FOOT_COUNT = 12;
+  const pathZone = document.getElementById('pathZone');
+  const feet = [];
+  for (let i = 0; i < FOOT_COUNT; i++){
+    const f = document.createElement('div');
+    f.className = 'foot';
+    pathZone.appendChild(f);
+    feet.push(f);
+  }
+
+  const track = document.getElementById('track');
+  const trackFill = document.getElementById('trackFill');
+  const handle = document.getElementById('handle');
+  const readoutLabel = document.getElementById('readoutLabel');
+  const readoutScore = document.getElementById('readoutScore');
+  const desc = document.getElementById('desc');
+
+  function getZone(v){
+    return zones.find(z => v <= z.max);
+  }
+
+  function render(v){
+    trackFill.style.width = v + '%';
+    handle.style.left = v + '%';
+    readoutScore.textContent = Math.round(v);
+
+    const zone = getZone(v);
+    readoutLabel.textContent = zone.label;
+    desc.textContent = zone.desc;
+
+    feet.forEach((f, i) => {
+      const threshold = ((i + 1) / FOOT_COUNT) * 100;
+      const active = v >= threshold - (100 / FOOT_COUNT) * 0.5;
+      const t = Math.max(0, Math.min(1, (v - threshold + 30) / 30));
+      const heavy = 1 - (v / 100);
+      const height = 14 + heavy * 46;
+      const opacity = 0.35 + (active ? 0.65 : 0) * (1 - heavy * 0.3);
+      f.style.height = height + 'px';
+      f.style.opacity = Math.min(1, opacity).toFixed(2);
+      f.style.background = v > 65 ? 'var(--sage)' : 'var(--terracotta)';
+    });
+  }
+
+  let value = 15;
+  let dragging = false;
+
+  function setFromClientX(clientX){
+    const rect = track.getBoundingClientRect();
+    let pct = ((clientX - rect.left) / rect.width) * 100;
+    pct = Math.max(0, Math.min(100, pct));
+    value = pct;
+    render(value);
+  }
+
+  handle.addEventListener('mousedown', () => dragging = true);
+  track.addEventListener('mousedown', (e) => { dragging = true; setFromClientX(e.clientX); });
+  window.addEventListener('mousemove', (e) => { if (dragging) setFromClientX(e.clientX); });
+  window.addEventListener('mouseup', () => dragging = false);
+
+  handle.addEventListener('touchstart', () => dragging = true, { passive:true });
+  track.addEventListener('touchstart', (e) => { dragging = true; setFromClientX(e.touches[0].clientX); }, { passive:true });
+  window.addEventListener('touchmove', (e) => { if (dragging) setFromClientX(e.touches[0].clientX); }, { passive:true });
+  window.addEventListener('touchend', () => dragging = false);
+
+  // intro animation: play once from 0 to 70 to demonstrate the concept
+  render(0);
+  let introStart = null;
+  const introTarget = 68;
+  function introStep(ts){
+    if (introStart === null) introStart = ts;
+    const elapsed = ts - introStart;
+    const duration = 1800;
+    const t = Math.min(1, elapsed / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    value = eased * introTarget;
+    render(value);
+    if (t < 1) requestAnimationFrame(introStep);
+  }
+  requestAnimationFrame(introStep);
+</script>
+
+</body>
+</html>
