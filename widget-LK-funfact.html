@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>7 Catatan — Behavioral Research</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,600&family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600&display=swap');
+
+:root{
+  --bg:#15140E;
+  --bg-panel:#1D1B13;
+  --panel-border:rgba(243,238,225,0.10);
+  --cream:#F3EEE1;
+  --muted:#9C9A8A;
+  --muted-dim:#6F6D5F;
+  --orange:#DB8A5A;
+  --olive:#93A87A;
+  --olive-dim:rgba(147,168,122,0.30);
+  --red-dim:#B96856;
+}
+
+*{box-sizing:border-box; margin:0; padding:0;}
+
+html,body{
+  height:100%;
+  background:var(--bg);
+  color:var(--cream);
+  overflow:hidden;
+  font-family:'Inter',sans-serif;
+}
+
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:var(--olive);
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.eyebrow .dot{width:5px;height:5px;border-radius:50%;background:var(--orange);display:inline-block;}
+
+/* top bar */
+.topbar{
+  position:fixed; top:0; left:0; right:0;
+  display:flex; justify-content:space-between; align-items:center;
+  padding:20px 28px;
+  z-index:20;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10.5px;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:var(--muted-dim);
+  pointer-events:none;
+}
+.topbar span.hi{color:var(--muted);}
+
+/* progress line */
+.progress-track{
+  position:fixed; top:0; left:0; right:0; height:2px;
+  background:rgba(243,238,225,0.06); z-index:21;
+}
+.progress-fill{
+  height:100%; background:var(--orange);
+  width:14.28%;
+  transition:width .5s cubic-bezier(.65,0,.35,1);
+}
+
+/* carousel */
+.carousel{
+  height:100%; width:100%;
+  display:flex;
+  transition:transform .6s cubic-bezier(.65,0,.35,1);
+}
+.slide{
+  min-width:100%; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  padding:90px 8vw 110px;
+}
+.slide-inner{
+  width:100%; max-width:720px;
+  display:flex; flex-direction:column; gap:18px;
+}
+
+h1.headline{
+  font-family:'Fraunces',serif;
+  font-weight:700;
+  font-size:clamp(28px,4.2vw,44px);
+  line-height:1.12;
+  color:var(--cream);
+}
+p.accent-line{
+  font-family:'Fraunces',serif;
+  font-style:italic;
+  font-weight:600;
+  font-size:clamp(24px,3.6vw,38px);
+  line-height:1.15;
+  color:var(--orange);
+}
+p.body{
+  font-size:15px;
+  line-height:1.65;
+  color:var(--muted);
+  max-width:56ch;
+}
+p.body b{color:var(--cream); font-weight:600;}
+
+.visual-card{
+  margin-top:8px;
+  background:var(--bg-panel);
+  border:1px solid var(--panel-border);
+  border-radius:18px;
+  padding:28px 30px 22px;
+}
+.visual-caption{
+  margin-top:14px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10.5px;
+  letter-spacing:0.04em;
+  color:var(--muted-dim);
+}
+
+/* bottom nav */
+.bottomnav{
+  position:fixed; left:0; right:0; bottom:0;
+  display:flex; align-items:center; justify-content:center;
+  gap:22px;
+  padding:22px 0 26px;
+  z-index:20;
+  background:linear-gradient(to top, rgba(21,20,14,0.95), rgba(21,20,14,0));
+}
+.navbtn{
+  width:36px; height:36px;
+  border-radius:50%;
+  border:1px solid var(--panel-border);
+  background:rgba(243,238,225,0.03);
+  color:var(--cream);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  transition:border-color .2s, background .2s;
+}
+.navbtn:hover{border-color:var(--olive); background:rgba(147,168,122,0.08);}
+.navbtn:disabled{opacity:.25; cursor:default;}
+.navbtn:disabled:hover{border-color:var(--panel-border); background:rgba(243,238,225,0.03);}
+.dots{display:flex; gap:9px;}
+.dotbtn{
+  width:7px; height:7px; border-radius:50%;
+  background:var(--panel-border);
+  border:none; cursor:pointer; padding:0;
+  transition:background .25s, transform .25s, width .25s;
+}
+.dotbtn.active{background:var(--orange); width:20px; border-radius:4px;}
+
+/* ============ SVG shared bits ============ */
+svg text{font-family:'IBM Plex Mono',monospace;}
+.num-serif{font-family:'Fraunces',serif; font-weight:700;}
+
+/* Slide 1 — range */
+.s1 .track{stroke:rgba(243,238,225,0.14); stroke-width:3;}
+.s1 .fill{stroke:var(--olive); stroke-width:3; stroke-dasharray:520; stroke-dashoffset:520;}
+.is-active .s1 .fill{animation:drawFill 1.1s .15s cubic-bezier(.65,0,.35,1) forwards;}
+@keyframes drawFill{to{stroke-dashoffset:0;}}
+.s1 .mitos-tick{opacity:0; transform:translateY(-4px);}
+.is-active .s1 .mitos-tick{animation:fadeUp .5s .9s ease forwards;}
+@keyframes fadeUp{to{opacity:1; transform:translateY(0);}}
+
+/* Slide 2 — bars */
+.s2 .bar{transform:scaleX(0); transform-origin:left;}
+.is-active .s2 .bar{animation:growBar .8s cubic-bezier(.65,0,.35,1) forwards;}
+.s2 .bar:nth-of-type(1){animation-delay:.05s;}
+.s2 .bar:nth-of-type(2){animation-delay:.18s;}
+@keyframes growBar{to{transform:scaleX(1);}}
+
+/* Slide 3 — dots */
+.s3 .d{opacity:0; transform:scale(.4);}
+.is-active .s3 .d{animation:popDot .35s ease forwards;}
+.s3 .arcline{stroke-dasharray:400; stroke-dashoffset:400;}
+.is-active .s3 .arcline{animation:drawFill 1s .6s ease forwards;}
+@keyframes popDot{to{opacity:1; transform:scale(1);}}
+
+/* Slide 4 — lines */
+.s4 .line{stroke-dasharray:480; stroke-dashoffset:480;}
+.is-active .s4 .line{animation:drawFill 1.4s cubic-bezier(.5,0,.4,1) forwards;}
+.is-active .s4 .line.motiv{animation-delay:0s;}
+.is-active .s4 .line.env{animation-delay:.25s;}
+
+/* Slide 5 — chain */
+.s5 .node{opacity:0; transform:scale(.6);}
+.is-active .s5 .node{animation:popDot .4s ease forwards;}
+.is-active .s5 .node:nth-of-type(1){animation-delay:.1s;}
+.is-active .s5 .node:nth-of-type(2){animation-delay:.4s;}
+.is-active .s5 .node:nth-of-type(3){animation-delay:.7s;}
+.s5 .link{stroke-dasharray:60; stroke-dashoffset:60;}
+.is-active .s5 .link{animation:drawFill .4s ease forwards;}
+.is-active .s5 .link:nth-of-type(1){animation-delay:.3s;}
+.is-active .s5 .link:nth-of-type(2){animation-delay:.6s;}
+
+/* Slide 6 — timeline */
+.s6 .decay{stroke-dasharray:460; stroke-dashoffset:460;}
+.is-active .s6 .decay{animation:drawFill 1.3s .2s ease forwards;}
+.s6 .burst{opacity:0; transform:scale(.3);}
+.is-active .s6 .burst{animation:popDot .5s .1s cubic-bezier(.34,1.56,.64,1) forwards;}
+.s6 .faint{opacity:0;}
+.is-active .s6 .faint{animation:fadeUp .6s 1s ease forwards;}
+
+/* Slide 7 — mirror curve */
+.s7 .curve{stroke-dasharray:520; stroke-dashoffset:520;}
+.is-active .s7 .curve.good{animation:drawFill 1.2s .1s cubic-bezier(.5,0,.4,1) forwards;}
+.is-active .s7 .curve.bad{animation:drawFill 1.2s .3s cubic-bezier(.5,0,.4,1) forwards;}
+
+@media(max-width:640px){
+  .slide{padding:76px 6vw 120px;}
+  .visual-card{padding:20px 16px 16px;}
+  .bottomnav{gap:14px;}
+}
+</style>
+</head>
+<body>
+
+<div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+<div class="topbar">
+  <span>7 CATATAN <span class="hi">·</span> BEHAVIORAL RESEARCH</span>
+  <span id="counter" class="hi">01 / 07</span>
+</div>
+
+<div class="carousel" id="carousel">
+
+  <!-- SLIDE 1 -->
+  <section class="slide">
+    <div class="slide-inner">
+      <p class="eyebrow"><span class="dot"></span>01 · ANGKA YANG SALAH DIKUTIP</p>
+      <h1 class="headline">Kebiasaan gak dibentuk</h1>
+      <p class="accent-line">oleh tanggal, tapi oleh rasa.</p>
+      <p class="body">"21 hari" itu mitos — asalnya dari observasi non-ilmiah tahun 1960-an oleh Maxwell Maltz soal pasien operasi plastik, <b>bukan riset habit</b>. Riset yang lebih solid (Lally dkk., 2010, UCL) nemuin rata-rata <b>66 hari</b> sampai sebuah kebiasaan jadi otomatis.</p>
+      <div class="visual-card s1">
+        <svg viewBox="0 0 620 150" width="100%" height="150">
+          <text x="0" y="40" class="num-serif" font-size="46" fill="#F3EEE1">66</text>
+          <text x="80" y="26" font-size="11" fill="#9C9A8A">hari rata-rata sampai</text>
+          <text x="80" y="42" font-size="11" fill="#9C9A8A">kebiasaan jadi <tspan fill="#F3EEE1" font-weight="600">otomatis</tspan></text>
+          <line x1="40" y1="90" x2="560" y2="90" class="track" stroke-linecap="round"/>
+          <line x1="40" y1="90" x2="150" y2="90" class="fill" stroke-linecap="round"/>
+          <circle cx="150" cy="90" r="5" fill="#93A87A"/>
+          <g class="mitos-tick">
+            <line x1="47" y1="82" x2="47" y2="98" stroke="#B96856" stroke-width="2"/>
+            <text x="47" y="72" font-size="10" fill="#B96856" text-anchor="middle">21 (mitos)</text>
+          </g>
+          <text x="40" y="118" font-size="10.5" fill="#6F6D5F">18 hari (tercepat)</text>
+          <text x="560" y="118" font-size="10.5" fill="#6F6D5F" text-anchor="end">254 hari (terlama)</text>
+        </svg>
+        <p class="visual-caption">Lally et al., 2010 — European Journal of Social Psychology, UCL</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 2 -->
+  <section class="slide">
+    <div class="slide-inner">
+      <p class="eyebrow"><span class="dot"></span>02 · KOMPLEKSITAS = WAKTU</p>
+      <h1 class="headline">Makin simpel habit-nya,</h1>
+      <p class="accent-line">makin cepat nempel.</p>
+      <p class="body">Minum air atau stretching bisa otomatis dalam hitungan minggu. Olahraga rutin atau journaling bisa makan waktu berbulan-bulan. Itu sebabnya rentang 18–254 hari lebar banget — <b>bukan risetnya gak presisi</b>, variasinya emang nyata tergantung jenis habit.</p>
+      <div class="visual-card s2">
+        <svg viewBox="0 0 620 170" width="100%" height="170">
+          <text x="0" y="14" font-size="10.5" fill="#6F6D5F">CEPAT</text>
+          <text x="600" y="14" font-size="10.5" fill="#6F6D5F" text-anchor="end">LAMBAT</text>
+
+          <rect x="0" y="30" width="170" height="18" rx="9" fill="#93A87A" class="bar"/>
+          <text x="180" y="43" font-size="12" fill="#F3EEE1">Minum air, stretching</text>
+          <text x="180" y="43" dy="14" font-size="10" fill="#6F6D5F">~2–5 minggu</text>
+
+          <rect x="0" y="80" width="330" height="18" rx="9" fill="#C79A6B" class="bar"/>
+          <text x="340" y="93" font-size="12" fill="#F3EEE1">Makan sehat, olahraga</text>
+          <text x="340" y="93" dy="14" font-size="10" fill="#6F6D5F">~2–4 bulan</text>
+
+          <rect x="0" y="130" width="520" height="18" rx="9" fill="#DB8A5A" class="bar"/>
+          <text x="200" y="144" font-size="12" fill="#15140E" font-weight="600">Journaling &amp; habit reflektif</text>
+        </svg>
+        <p class="visual-caption">Ilustrasi rentang relatif, bukan angka pasti per-habit dari studi</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 3 -->
+  <section class="slide">
+    <div class="slide-inner">
+      <p class="eyebrow"><span class="dot"></span>03 · SEKALI BOLONG, GAK APA-APA</p>
+      <h1 class="headline">Kelewat sekali gak</h1>
+      <p class="accent-line">ngerusak progres.</p>
+      <p class="body">Studi yang sama nemuin, satu kali <i>missed</i> gak signifikan ganggu automaticity — jeda beberapa hari cuma bikin diem, bukan reset ke nol. Yang bahaya itu kalau bolongnya jadi <b>pola berulang</b> (misal 3x beruntun) — itu baru bisa bikin automaticity runtuh.</p>
+      <div class="visual-card s3">
+        <svg viewBox="0 0 620 190" width="100%" height="190">
+          <text x="0" y="16" font-size="10.5" fill="#93A87A">1× KELEWAT → JALAN TERUS</text>
+          <path d="M20 55 L80 50 L140 45 L200 58 L260 40 L320 35 L380 30 L440 26" fill="none" stroke="#93A87A" stroke-width="2" class="arcline"/>
+          <g>
+            <circle class="d" cx="20" cy="60" r="7" fill="#93A87A" style="animation-delay:.05s"/>
+            <circle class="d" cx="80" cy="60" r="7" fill="#93A87A" style="animation-delay:.1s"/>
+            <circle class="d" cx="140" cy="60" r="7" fill="#93A87A" style="animation-delay:.15s"/>
+            <circle class="d" cx="200" cy="60" r="7" fill="none" stroke="#6F6D5F" stroke-width="2" style="animation-delay:.2s"/>
+            <circle class="d" cx="260" cy="60" r="7" fill="#93A87A" style="animation-delay:.25s"/>
+            <circle class="d" cx="320" cy="60" r="7" fill="#93A87A" style="animation-delay:.3s"/>
+            <circle class="d" cx="380" cy="60" r="7" fill="#93A87A" style="animation-delay:.35s"/>
+            <circle class="d" cx="440" cy="60" r="7" fill="#93A87A" style="animation-delay:.4s"/>
+          </g>
+
+          <text x="0" y="115" font-size="10.5" fill="#B96856">3× BERUNTUN → AUTOMATICITY RUNTUH</text>
+          <path d="M20 155 L80 158 L140 162 L200 172 L260 178 L320 180 L380 181 L440 182" fill="none" stroke="#B96856" stroke-width="2" class="arcline" style="animation-delay:.7s"/>
+          <g>
+            <circle class="d" cx="20" cy="160" r="7" fill="#B96856" style="animation-delay:.45s"/>
+            <circle class="d" cx="80" cy="160" r="7" fill="#B96856" style="animation-delay:.5s"/>
+            <circle class="d" cx="140" cy="160" r="7" fill="none" stroke="#6F6D5F" stroke-width="2" style="animation-delay:.55s"/>
+            <circle class="d" cx="200" cy="160" r="7" fill="none" stroke="#6F6D5F" stroke-width="2" style="animation-delay:.6s"/>
+            <circle class="d" cx="260" cy="160" r="7" fill="none" stroke="#6F6D5F" stroke-width="2" style="animation-delay:.65s"/>
+            <circle class="d" cx="320" cy="160" r="7" fill="#6F6D5F" style="animation-delay:.7s"/>
+            <circle class="d" cx="380" cy="160" r="7" fill="#6F6D5F" style="animation-delay:.75s"/>
+            <circle class="d" cx="440" cy="160" r="7" fill="#6F6D5F" style="animation-delay:.8s"/>
+          </g>
+        </svg>
+        <p class="visual-caption">Titik kosong = hari kelewat. Garis = arah tren automaticity</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 4 -->
+  <section class="slide">
+    <div class="slide-inner">
+      <p class="eyebrow"><span class="dot"></span>04 · DESAIN MENANG DARI NIAT</p>
+      <h1 class="headline">Motivasi naik turun.</h1>
+      <p class="accent-line">Lingkungan yang didesain, gak.</p>
+      <p class="body">Motivasi gak reliable buat jangka panjang. Habit yang bertahan itu yang udah lepas dari kebutuhan motivasi — orang yang mendesain lingkungannya (naruh barang di tempat kelihatan, dll.) jauh lebih konsisten daripada yang cuma andelin <b>willpower</b>.</p>
+      <div class="visual-card s4">
+        <svg viewBox="0 0 620 180" width="100%" height="180">
+          <line x1="20" y1="150" x2="580" y2="150" stroke="rgba(243,238,225,0.14)"/>
+          <path class="line motiv" d="M20 60 L90 100 L160 50 L230 120 L300 70 L370 130 L440 90 L510 140 L580 128" fill="none" stroke="#DB8A5A" stroke-width="2.5"/>
+          <path class="line env" d="M20 140 L90 130 L160 118 L230 104 L300 88 L370 72 L440 55 L510 40 L580 26" fill="none" stroke="#93A87A" stroke-width="2.5"/>
+          <circle cx="20" cy="60" r="4" fill="#DB8A5A"/>
+          <text x="30" y="55" font-size="11" fill="#DB8A5A">motivasi</text>
+          <circle cx="20" cy="140" r="4" fill="#93A87A"/>
+          <text x="30" y="165" font-size="11" fill="#93A87A">desain lingkungan</text>
+          <text x="580" y="18" font-size="10" fill="#6F6D5F" text-anchor="end">hari ke-30</text>
+        </svg>
+        <p class="visual-caption">Konsistensi dari waktu ke waktu — pola ilustratif</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 5 -->
+  <section class="slide">
+    <div class="slide-inner">
+      <p class="eyebrow"><span class="dot"></span>05 · NUMPANG DI TRIGGER YANG KUAT</p>
+      <h1 class="headline">Habit baru butuh sandaran,</h1>
+      <p class="accent-line">bukan niat baru.</p>
+      <p class="body">Konteks yang konsisten — waktu &amp; tempat yang sama tiap hari — mempercepat otak bentuk asosiasi otomatis. Salah satu caranya: <b>habit stacking</b>, nempelin habit baru ke rutinitas yang udah otomatis. Misal, "abis sikat gigi, langsung minum vitamin."</p>
+      <div class="visual-card s5">
+        <svg viewBox="0 0 620 140" width="100%" height="140">
+          <line class="link" x1="130" y1="65" x2="220" y2="65" stroke="#93A87A" stroke-width="2"/>
+          <line class="link" x1="330" y1="65" x2="420" y2="65" stroke="rgba(243,238,225,0.25)" stroke-width="2" stroke-dasharray="6 6"/>
+
+          <g class="node">
+            <circle cx="65" cy="65" r="52" fill="#93A87A"/>
+            <text x="65" y="60" font-size="22" text-anchor="middle">🪥</text>
+            <text x="65" y="80" font-size="10.5" text-anchor="middle" fill="#15140E" font-weight="600">Sikat gigi</text>
+          </g>
+          <text x="65" y="128" font-size="9.5" text-anchor="middle" fill="#6F6D5F">TRIGGER YANG UDAH KUAT</text>
+
+          <g class="node">
+            <circle cx="275" cy="65" r="52" fill="none" stroke="#DB8A5A" stroke-width="2.5"/>
+            <text x="275" y="60" font-size="22" text-anchor="middle">💊</text>
+            <text x="275" y="80" font-size="10.5" text-anchor="middle" fill="#F3EEE1" font-weight="600">Minum vitamin</text>
+          </g>
+          <text x="275" y="128" font-size="9.5" text-anchor="middle" fill="#6F6D5F">HABIT BARU</text>
+
+          <g class="node">
+            <circle cx="480" cy="65" r="42" fill="none" stroke="rgba(243,238,225,0.2)" stroke-width="2" stroke-dasharray="4 5"/>
+            <text x="480" y="70" font-size="20" text-anchor="middle" fill="#6F6D5F">+</text>
+          </g>
+          <text x="480" y="128" font-size="9.5" text-anchor="middle" fill="#6F6D5F">STACK BERIKUTNYA</text>
+        </svg>
+        <p class="visual-caption">Rantai trigger → habit baru → habit berikutnya</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 6 -->
+  <section class="slide">
+    <div class="slide-inner">
+      <p class="eyebrow"><span class="dot"></span>06 · OTAK BUTUH BUKTI SEKARANG</p>
+      <h1 class="headline">Reward instan menang,</h1>
+      <p class="accent-line">janji masa depan kalah.</p>
+      <p class="body">Otak butuh sinyal "ini enak, ini berguna" di momen itu juga — bukan cuma janji manfaat di masa depan. Reward instan jauh lebih efektif memperkuat habit daripada reward jangka panjang.</p>
+      <div class="visual-card s6">
+        <svg viewBox="0 0 620 170" width="100%" height="170">
+          <line x1="20" y1="140" x2="580" y2="140" stroke="rgba(243,238,225,0.14)"/>
+          <path class="decay" d="M40 40 C 150 60, 300 110, 560 130" fill="none" stroke="#DB8A5A" stroke-width="2" stroke-dasharray="5 5"/>
+
+          <g class="burst">
+            <circle cx="40" cy="40" r="14" fill="#DB8A5A"/>
+            <text x="40" y="45" font-size="14" text-anchor="middle">⚡</text>
+          </g>
+          <text x="40" y="20" font-size="11" fill="#F3EEE1" text-anchor="middle" font-weight="600">SEKARANG</text>
+
+          <g class="faint">
+            <circle cx="560" cy="130" r="7" fill="none" stroke="#6F6D5F" stroke-width="1.5"/>
+          </g>
+          <text class="faint" x="560" y="155" font-size="10" fill="#6F6D5F" text-anchor="end">3 bulan lagi</text>
+
+          <text x="300" y="90" font-size="10" fill="#6F6D5F" text-anchor="middle">perhatian &amp; dorongan otak menurun →</text>
+        </svg>
+        <p class="visual-caption">Kurva peluruhan perhatian terhadap reward yang ditunda</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 7 -->
+  <section class="slide">
+    <div class="slide-inner">
+      <p class="eyebrow"><span class="dot"></span>07 · MEKANISME NETRAL</p>
+      <h1 class="headline">Otak gak peduli</h1>
+      <p class="accent-line">baik atau buruk.</p>
+      <p class="body">Mekanisme automaticity gak beda antara kebiasaan baik dan buruk — keduanya ngikutin kurva pembentukan yang sama persis. Kebiasaan buruk kepasang lewat proses yang identik. <b>Bedanya cuma arah</b>, bukan prosesnya.</p>
+      <div class="visual-card s7">
+        <svg viewBox="0 0 620 190" width="100%" height="190">
+          <line x1="20" y1="95" x2="580" y2="95" stroke="rgba(243,238,225,0.16)"/>
+          <text x="585" y="99" font-size="10" fill="#6F6D5F">hari →</text>
+
+          <path class="curve good" d="M30 90 C 130 90, 160 20, 300 20 C 440 20, 470 8, 570 8" fill="none" stroke="#93A87A" stroke-width="2.5"/>
+          <text x="30" y="12" font-size="11" fill="#93A87A" font-weight="600">habit baik</text>
+
+          <path class="curve bad" d="M30 100 C 130 100, 160 170, 300 170 C 440 170, 470 182, 570 182" fill="none" stroke="#DB8A5A" stroke-width="2.5"/>
+          <text x="30" y="185" font-size="11" fill="#DB8A5A" font-weight="600">habit buruk</text>
+
+          <text x="0" y="50" font-size="9.5" fill="#6F6D5F" transform="rotate(-90 10 50)">otomatis ↑</text>
+        </svg>
+        <p class="visual-caption">Kurva cermin — bentuk identik, arah nilai berbeda</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="bottomnav">
+  <button class="navbtn" id="prevBtn" aria-label="Sebelumnya">‹</button>
+  <div class="dots" id="dots"></div>
+  <button class="navbtn" id="nextBtn" aria-label="Berikutnya">›</button>
+</div>
+
+<script>
+const carousel = document.getElementById('carousel');
+const slides = document.querySelectorAll('.slide');
+const dotsWrap = document.getElementById('dots');
+const counter = document.getElementById('counter');
+const progressFill = document.getElementById('progressFill');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const total = slides.length;
+let current = 0;
+
+slides.forEach((_, i) => {
+  const b = document.createElement('button');
+  b.className = 'dotbtn' + (i === 0 ? ' active' : '');
+  b.addEventListener('click', () => goTo(i));
+  dotsWrap.appendChild(b);
+});
+const dotEls = document.querySelectorAll('.dotbtn');
+
+function activate(el){
+  el.classList.remove('is-active');
+  void el.offsetWidth;
+  el.classList.add('is-active');
+}
+
+function goTo(i){
+  if(i < 0 || i >= total) return;
+  current = i;
+  carousel.style.transform = `translateX(-${i * 100}%)`;
+  dotEls.forEach((d, idx) => d.classList.toggle('active', idx === i));
+  counter.textContent = String(i+1).padStart(2,'0') + ' / ' + String(total).padStart(2,'0');
+  progressFill.style.width = ((i+1)/total*100) + '%';
+  prevBtn.disabled = i === 0;
+  nextBtn.disabled = i === total - 1;
+  activate(slides[i]);
+}
+
+prevBtn.addEventListener('click', () => goTo(current - 1));
+nextBtn.addEventListener('click', () => goTo(current + 1));
+
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'ArrowRight') goTo(current + 1);
+  if(e.key === 'ArrowLeft') goTo(current - 1);
+});
+
+// touch swipe
+let touchStartX = null;
+document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, {passive:true});
+document.addEventListener('touchend', (e) => {
+  if(touchStartX === null) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if(Math.abs(dx) > 50){ dx < 0 ? goTo(current+1) : goTo(current-1); }
+  touchStartX = null;
+}, {passive:true});
+
+// wheel (horizontal-ish)
+let wheelLock = false;
+document.addEventListener('wheel', (e) => {
+  if(wheelLock) return;
+  const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+  if(Math.abs(delta) < 30) return;
+  wheelLock = true;
+  delta > 0 ? goTo(current+1) : goTo(current-1);
+  setTimeout(() => wheelLock = false, 650);
+}, {passive:true});
+
+goTo(0);
+</script>
+
+</body>
+</html>
