@@ -15,21 +15,23 @@
     --terracotta:#B0715A;
   }
   *{ margin:0; padding:0; box-sizing:border-box; }
-  html, body{ height:100%; background:transparent; }
+  html, body{ height:100%; width:100%; background:transparent; }
   body{
     font-family:'IBM Plex Mono', monospace;
-    display:flex; align-items:center; justify-content:center;
   }
 
   .clock-card{
     position:relative;
     width:100%;
-    max-width:480px;
+    height:100%;
     background:var(--charcoal);
-    border-radius:18px;
     padding:36px 30px 28px;
     overflow:hidden;
     text-align:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
   }
 
   /* subtle grain texture, echoes the Instagram post background */
