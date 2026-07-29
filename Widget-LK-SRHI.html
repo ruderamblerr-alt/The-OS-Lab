@@ -14,20 +14,21 @@
     --terracotta:#B0715A;
   }
   *{ margin:0; padding:0; box-sizing:border-box; user-select:none; -webkit-user-select:none; }
-  html, body{ height:100%; background:transparent; }
+  html, body{ height:100%; width:100%; background:transparent; }
   body{
     font-family:'IBM Plex Mono', monospace;
-    display:flex; align-items:center; justify-content:center;
   }
 
   .card{
     position:relative;
     width:100%;
-    max-width:560px;
+    height:100%;
     background:var(--charcoal);
-    border-radius:20px;
     padding:38px 34px 30px;
     overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
   }
   .card::before{
     content:'';
