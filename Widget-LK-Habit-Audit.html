@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habit Audit — Animated Flow Canvas</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg-charcoal: #1C1A18;
+      --text-cream: #EDE6D8;
+      --accent-sage: #8FA896;
+      --text-warm-gray: #6B655C;
+      --accent-rust: #B0715A;
+      --deep-sage: #5C6B54;
+      --soft-gold: #C9A876;
+      
+      --glass-bg: rgba(28, 26, 24, 0.55);
+      --glass-card: rgba(237, 230, 216, 0.04);
+      --glass-border: rgba(237, 230, 216, 0.12);
+      --glass-border-light: rgba(237, 230, 216, 0.25);
+      --glass-glow-sage: rgba(143, 168, 150, 0.35);
+      --glass-glow-gold: rgba(201, 168, 118, 0.35);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: var(--bg-charcoal);
+      color: var(--text-cream);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* 1. EFEK PARTIKEL KURSOR CANVAS OVERLAY */
+    #particleCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 99;
+    }
+
+    /* Ambient Dynamic Glowing Background Orbs */
+    .bg-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      z-index: 0;
+      opacity: 0.45;
+      animation: floatOrb 12s ease-in-out infinite alternate;
+    }
+    .orb-1 { width: 380px; height: 380px; background: var(--deep-sage); top: -80px; left: -80px; }
+    .orb-2 { width: 420px; height: 420px; background: var(--accent-rust); bottom: -100px; right: -100px; animation-delay: -6s; }
+    .orb-3 { width: 280px; height: 280px; background: var(--soft-gold); top: 40%; left: 50%; transform: translate(-50%, -50%); opacity: 0.2; }
+
+    @keyframes floatOrb {
+      0% { transform: translateY(0) scale(1); }
+      100% { transform: translateY(30px) scale(1.1); }
+    }
+
+    /* Glass Canvas Container */
+    .canvas-container {
+      position: relative;
+      z-index: 1;
+      width: 92vw;
+      max-width: 960px;
+      max-height: 94vh;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 28px;
+      padding: 24px 32px;
+      backdrop-filter: blur(24px) saturate(160%);
+      box-shadow: 
+        0 30px 60px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(237, 230, 216, 0.15);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden; /* Dibuat hidden agar scanline tetap di dalam container */
+    }
+
+    /* 3. EFEK HOLOGRAPHIC SCANLINE */
+    .canvas-container::before {
+      content: '';
+      position: absolute;
+      top: -100%;
+      left: 0;
+      width: 100%;
+      height: 60%;
+      background: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba(143, 168, 150, 0.05) 50%,
+        rgba(201, 168, 118, 0.15) 95%,
+        var(--soft-gold) 100%
+      );
+      box-shadow: 0 2px 10px rgba(201, 168, 118, 0.3);
+      opacity: 0.7;
+      pointer-events: none;
+      z-index: 8;
+      animation: scanline 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    @keyframes scanline {
+      0% { top: -60%; }
+      30%, 100% { top: 120%; }
+    }
+
+    /* Floating Figma Cursor Badges */
+    .figma-cursor {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px 20px 20px 2px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 600;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+      pointer-events: none;
+      z-index: 10;
+      animation: floatBadge 4s ease-in-out infinite alternate;
+    }
+    .cursor-1 {
+      top: 45px; right: 24px;
+      background: var(--accent-sage); color: var(--bg-charcoal);
+    }
+    .cursor-2 {
+      bottom: 60px; left: -15px;
+      background: var(--soft-gold); color: var(--bg-charcoal);
+      animation-delay: -2s;
+    }
+
+    @keyframes floatBadge {
+      0% { transform: translateY(0px) rotate(0deg); }
+      100% { transform: translateY(-8px) rotate(2deg); }
+    }
+
+    /* Topbar Meta */
+    .meta-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--text-warm-gray);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(237, 230, 216, 0.08);
+    }
+
+    .meta-topbar .tag {
+      color: var(--accent-sage);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot-beacon {
+      width: 6px; height: 6px;
+      background: var(--accent-sage);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-sage);
+      animation: blink 2s infinite;
+    }
+
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    /* Editorial Title */
+    .editorial-title {
+      font-family: 'Newsreader', serif;
+      font-size: 30px;
+      font-weight: 500;
+      color: var(--text-cream);
+      line-height: 1.15;
+      margin-top: 6px;
+      letter-spacing: -0.01em;
+    }
+
+    .editorial-title span {
+      font-style: italic;
+      color: var(--accent-rust);
+    }
+
+    /* Waveform Visualizer Component */
+    .waveform-container {
+      margin: 8px 0 12px 0;
+      padding: 10px 14px;
+      background: rgba(237, 230, 216, 0.02);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .waveform-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+    }
+
+    .wave-title {
+      color: var(--text-warm-gray);
+    }
+
+    .wave-status {
+      color: var(--accent-rust);
+      font-weight: 700;
+      transition: color 0.4s ease;
+    }
+
+    .waveform-svg {
+      width: 100%;
+      height: 36px;
+      overflow: visible;
+    }
+
+    /* Input Box Glassmorphic */
+    .habit-input-box {
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(237, 230, 216, 0.03);
+      padding: 8px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .habit-input-box:focus-within {
+      border-color: var(--soft-gold);
+      box-shadow: 0 0 15px var(--glass-glow-gold);
+      background: rgba(237, 230, 216, 0.06);
+    }
+
+    .habit-input-box label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--soft-gold);
+      white-space: nowrap;
+      letter-spacing: 0.05em;
+    }
+
+    .habit-input-box input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-cream);
+      font-family: 'Newsreader', serif;
+      font-size: 16px;
+      font-style: italic;
+    }
+
+    .habit-input-box input::placeholder {
+      color: var(--text-warm-gray);
+      font-style: normal;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 12px;
+    }
+
+    /* Main Grid Canvas */
+    .hud-canvas {
+      display: grid;
+      grid-template-columns: 1fr 220px 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 14px;
+      align-items: center;
+    }
+
+    /* Floating Point Node (Cards) */
+    .point-node-hub {
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      backdrop-filter: blur(8px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .point-node-hub:hover {
+      border-color: var(--glass-border-light);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+
+    .hub-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    /* Floating Badge Interactive Buttons */
+    .hub-btn {
+      position: relative;
+      overflow: hidden;
+      background: rgba(28, 26, 24, 0.5);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 11px;
+      color: var(--text-warm-gray);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+      line-height: 1.2;
+    }
+
+    .hub-btn::after {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: linear-gradient(60deg, transparent, rgba(255,255,255,0.08), transparent);
+      transform: rotate(30deg) translateY(-100%);
+      transition: transform 0.6s ease;
+    }
+
+    .hub-btn:hover::after {
+      transform: rotate(30deg) translateY(100%);
+    }
+
+    .hub-btn:hover {
+      color: var(--text-cream);
+      border-color: var(--glass-border-light);
+    }
+
+    .hub-btn.active {
+      background: var(--accent-sage);
+      border-color: var(--accent-sage);
+      color: var(--bg-charcoal);
+      font-weight: 600;
+      box-shadow: 0 4px 15px var(--glass-glow-sage);
+    }
+
+    .pill-check {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      border: 1.5px solid var(--text-warm-gray);
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .hub-btn.active .pill-check {
+      background: var(--bg-charcoal);
+      border-color: var(--bg-charcoal);
+    }
+
+    /* Center Radar Visual */
+    .radar-center-hub {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      width: 220px;
+      height: 220px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 4. EFEK SHOCKWAVE BURST (100% SCORE) */
+    .shockwave-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      border: 2px solid var(--soft-gold);
+      box-shadow: 0 0 20px var(--soft-gold), inset 0 0 15px var(--soft-gold);
+      transform: translate(-50%, -50%) scale(0.8);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .shockwave-ring.trigger-burst {
+      animation: shockwavePulse 1.2s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+    }
+
+    @keyframes shockwavePulse {
+      0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 1;
+        border-width: 4px;
+      }
+      50% {
+        opacity: 0.8;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(2.2);
+        opacity: 0;
+        border-width: 1px;
+      }
+    }
+
+    .radar-svg { width: 100%; height: 100%; overflow: visible; }
+
+    .radar-score-overlay {
+      position: absolute;
+      text-align: center;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .radar-score-num {
+      font-family: 'Newsreader', serif;
+      font-size: 44px;
+      font-weight: 500;
+      color: var(--text-cream);
+      line-height: 1;
+      text-shadow: 0 0 20px rgba(237, 230, 216, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .radar-score-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      color: var(--soft-gold);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* Footer & Action Bar */
+    .hud-footer {
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(237, 230, 216, 0.02);
+      padding: 10px 20px;
+      border-radius: 100px;
+      border: 1px solid var(--glass-border);
+    }
+
+    .status-readout {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--text-warm-gray);
+      letter-spacing: 0.05em;
+    }
+
+    .status-readout span {
+      color: var(--accent-sage);
+      font-weight: 700;
+    }
+
+    .footer-actions { display: flex; gap: 10px; }
+
+    .btn-reset {
+      background: transparent;
+      color: var(--text-warm-gray);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      padding: 8px 14px;
+      border: 1px solid var(--glass-border);
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-reset:hover {
+      color: var(--accent-rust);
+      border-color: var(--accent-rust);
+    }
+
+    .btn-scan {
+      background: var(--text-cream);
+      color: var(--bg-charcoal);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      padding: 8px 20px;
+      border: none;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(237, 230, 216, 0.2);
+    }
+
+    .btn-scan:hover {
+      background: var(--soft-gold);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px var(--glass-glow-gold);
+    }
+
+    /* GLASS MODAL DIAGNOSIS */
+    .hud-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(28, 26, 24, 0.75);
+      backdrop-filter: blur(20px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .hud-modal-overlay.open { opacity: 1; pointer-events: auto; }
+
+    .hud-modal-card {
+      width: 100%;
+      max-width: 520px;
+      max-height: 85vh;
+      overflow-y: auto;
+      background: rgba(28, 26, 24, 0.92);
+      border: 1px solid var(--soft-gold);
+      border-radius: 24px;
+      padding: 28px 24px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      text-align: center;
+      transform: scale(0.9);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .hud-modal-overlay.open .hud-modal-card { transform: scale(1); }
+
+    .modal-hud-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--soft-gold);
+      letter-spacing: 0.2em;
+      margin-bottom: 8px;
+    }
+
+    .modal-hud-score {
+      font-family: 'Newsreader', serif;
+      font-size: 56px;
+      font-weight: 500;
+      color: var(--text-cream);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .modal-hud-title {
+      font-family: 'Newsreader', serif;
+      font-size: 22px;
+      font-style: italic;
+      color: var(--text-cream);
+      margin-bottom: 10px;
+    }
+
+    .modal-hud-desc {
+      font-size: 12px;
+      color: var(--text-warm-gray);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .btn-modal-close {
+      background: transparent;
+      border: 1px solid var(--glass-border);
+      color: var(--text-cream);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      padding: 8px 20px;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-modal-close:hover {
+      background: var(--text-cream);
+      color: var(--bg-charcoal);
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="particleCanvas"></canvas>
+
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+
+  <div class="canvas-container">
+
+    <div class="figma-cursor cursor-1">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3l7 18 3-7 7-3L3 3z"/></svg>
+      Behavioral Designer
+    </div>
+    <div class="figma-cursor cursor-2">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3l7 18 3-7 7-3L3 3z"/></svg>
+      Habit Architect
+    </div>
+
+    <div class="meta-topbar">
+      <span>01 / AUDIT · Langkah KEcil</span>
+      <div class="tag">
+        <div class="dot-beacon"></div>
+        <span>LIVE RADAR</span>
+      </div>
+    </div>
+
+    <h1 class="editorial-title">
+      Audit Kebiasaan <span>secara terukur.</span>
+    </h1>
+    
+    <div class="waveform-container">
+      <div class="waveform-meta">
+        <span class="wave-title">STATE OF FLOW</span>
+        <span class="wave-status" id="waveStatus">FRICTION: HIGH (SPIKED)</span>
+      </div>
+      <svg class="waveform-svg" viewBox="0 0 400 40" preserveAspectRatio="none">
+        <path id="wavePath" 
+              d="M 0 20 L 400 20" 
+              fill="none" 
+              stroke="var(--accent-rust)" 
+              stroke-width="2.5" 
+              stroke-linecap="round" 
+              stroke-linejoin="round" />
+      </svg>
+    </div>
+
+    <div class="habit-input-box">
+      <label>[ TARGET HABIT ] :</label>
+      <input type="text" id="habitInput" placeholder="Ketik kebiasaan (misal: Olahraga Pagi 15 Menit)..." oninput="triggerAudioPulse(); saveData();">
+    </div>
+
+    <div class="hud-canvas">
+      
+      <div class="point-node-hub">
+        <div class="hub-head" style="color:var(--accent-sage)"><span>01 // OBVIOUS</span><span>[CUE]</span></div>
+        <div class="hub-btn" onclick="toggleBtn(this, 0)">
+          <div class="pill-check"></div>
+          <span>Waktu & lokasi spesifik diset</span>
+        </div>
+        <div class="hub-btn" onclick="toggleBtn(this, 1)">
+          <div class="pill-check"></div>
+          <span>Pemicu visual dipasang</span>
+        </div>
+      </div>
+
+      <div class="point-node-hub">
+        <div class="hub-head" style="color:var(--soft-gold)"><span>02 // ATTRACTIVE</span><span>[CRAVING]</span></div>
+        <div class="hub-btn" onclick="toggleBtn(this, 2)">
+          <div class="pill-check"></div>
+          <span>Temptation Bundling aktif</span>
+        </div>
+        <div class="hub-btn" onclick="toggleBtn(this, 3)">
+          <div class="pill-check"></div>
+          <span>Dukungan lingkungan positif</span>
+        </div>
+      </div>
+
+      <div class="radar-center-hub">
+        <div class="shockwave-ring" id="shockwaveRing"></div>
+
+        <svg class="radar-svg" viewBox="0 0 200 200">
+          <defs>
+            <filter id="glowSage" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+            <radialGradient id="polyGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#8FA896" stop-opacity="0.45"/>
+              <stop offset="100%" stop-color="#8FA896" stop-opacity="0.1"/>
+            </radialGradient>
+          </defs>
+
+          <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(237,230,216,0.08)" stroke-width="1"/>
+          <circle cx="100" cy="100" r="55" fill="none" stroke="rgba(237,230,216,0.08)" stroke-width="1"/>
+          <circle cx="100" cy="100" r="30" fill="none" stroke="rgba(237,230,216,0.08)" stroke-width="1"/>
+
+          <line x1="100" y1="15" x2="100" y2="185" stroke="rgba(237,230,216,0.12)" stroke-dasharray="3 3"/>
+          <line x1="15" y1="100" x2="185" y2="100" stroke="rgba(237,230,216,0.12)" stroke-dasharray="3 3"/>
+
+          <polygon id="radarPolygon" points="100,100 100,100 100,100 100,100 100,100 100,100 100,100 100,100" 
+                   fill="url(#polyGrad)" stroke="var(--accent-sage)" stroke-width="2" filter="url(#glowSage)" 
+                   style="transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);"/>
+
+          <circle cx="100" cy="100" r="86" fill="none" stroke="var(--soft-gold)" stroke-width="1.2" stroke-dasharray="10 60 4 20" stroke-linecap="round" opacity="0.4">
+            <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="14s" repeatCount="indefinite"/>
+          </circle>
+        </svg>
+
+        <div class="radar-score-overlay">
+          <div class="radar-score-num" id="radarScore">0%</div>
+          <div class="radar-score-label">HABIT POWER</div>
+        </div>
+      </div>
+
+      <div class="point-node-hub">
+        <div class="hub-head" style="color:var(--accent-sage)"><span>03 // EASY</span><span>[RESPONSE]</span></div>
+        <div class="hub-btn" onclick="toggleBtn(this, 4)">
+          <div class="pill-check"></div>
+          <span>Aturan 2 Menit (Ringkas)</span>
+        </div>
+        <div class="hub-btn" onclick="toggleBtn(this, 5)">
+          <div class="pill-check"></div>
+          <span>Peralatan siap dipake</span>
+        </div>
+      </div>
+
+      <div class="point-node-hub">
+        <div class="hub-head" style="color:var(--accent-rust)"><span>04 // SATISFYING</span><span>[REWARD]</span></div>
+        <div class="hub-btn" onclick="toggleBtn(this, 6)">
+          <div class="pill-check"></div>
+          <span>Imbalan langsung terasa</span>
+        </div>
+        <div class="hub-btn" onclick="toggleBtn(this, 7)">
+          <div class="pill-check"></div>
+          <span>Habit tracker terisi visual</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="hud-footer">
+      <div class="status-readout">STATUS: <span id="diagText">STANDBY (KLIK PEMICU)</span></div>
+      <div class="footer-actions">
+        <button class="btn-reset" onclick="resetAudit()">RESET</button>
+        <button class="btn-scan" onclick="openScanModal()">ANALYZE HABIT</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="hud-modal-overlay" id="hudModal">
+    <div class="hud-modal-card">
+      <div class="modal-hud-badge">// DIAGNOSIS SIRKUIT //</div>
+      <div class="modal-hud-score" id="mScore">0%</div>
+      <div class="modal-hud-title" id="mTitle">Status Sistem</div>
+      <div class="modal-hud-desc" id="mDesc">-</div>
+      <button class="btn-modal-close" onclick="closeScanModal()">[ TUTUP & RE-SCAN ]</button>
+    </div>
+  </div>
+
+  <script>
+    let activeState = new Array(8).fill(false);
+    let currentScore = 0;
+    let wavePhase = 0;
+    let pulseEnergy = 0; // Energi pulsa untuk efek audio-reactive waveform
+
+    const basePoints = [
+      [100, 25],  // Obvious 1
+      [150, 45],  // Obvious 2
+      [175, 100], // Attractive 1
+      [150, 155], // Attractive 2
+      [100, 175], // Easy 1
+      [50, 155],  // Easy 2
+      [25, 100],  // Satisfying 1
+      [50, 45]    // Satisfying 2
+    ];
+
+    /* ========================================================
+       1. INTERACTIVE CURSOR SPARKLE / DUST PARTICLES (CANVAS)
+       ======================================================== */
+    const pCanvas = document.getElementById('particleCanvas');
+    const ctx = pCanvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      pCanvas.width = window.innerWidth;
+      pCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    window.addEventListener('mousemove', (e) => {
+      // Membuat 2 partikel stardust setiap pergerakan mouse
+      for (let i = 0; i < 2; i++) {
+        particles.push({
+          x: e.clientX,
+          y: e.clientY,
+          size: Math.random() * 2.5 + 0.8,
+          vx: (Math.random() - 0.5) * 1.2,
+          vy: (Math.random() - 0.5) * 1.2 - 0.3,
+          alpha: 1,
+          color: Math.random() > 0.5 ? '#C9A876' : '#8FA896' // Soft gold atau Sage
+        });
+      }
+    });
+
+    function updateAndDrawParticles() {
+      ctx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+      for (let i = 0; i < particles.length; i++) {
+        let p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.alpha -= 0.025; // Fade out gradual
+
+        ctx.save();
+        ctx.globalAlpha = Math.max(p.alpha, 0);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        if (p.alpha <= 0) {
+          particles.splice(i, 1);
+          i--;
+        }
+      }
+      requestAnimationFrame(updateAndDrawParticles);
+    }
+    updateAndDrawParticles();
+
+    /* ========================================================
+       2. WAVEFORM ANIMATION + AUDIO-REACTIVE PULSE FEEDBACK
+       ======================================================== */
+    function triggerAudioPulse() {
+      pulseEnergy = 1.0; // Pemicu lonjakan audio-reactive pulse
+    }
+
+    function renderWaveAnimation() {
+      wavePhase += 0.09;
+      pulseEnergy *= 0.92; // Meluruhkan lonjakan secara halus
+      const path = document.getElementById('wavePath');
+      
+      if (path) {
+        const width = 400;
+        const step = 4;
+        let points = [];
+
+        for (let x = 0; x <= width; x += step) {
+          let y = 20;
+
+          // Hitung denyut pulse jantung/audio-reactive
+          const pulseEffect = Math.sin(x * 0.15 - wavePhase * 4) * (pulseEnergy * 12);
+
+          if (currentScore <= 38) {
+            // High friction: fast noise + jagged spiky peaks
+            const spikyNoise = (Math.sin(x * 0.35 + wavePhase * 3.5) > 0 ? 1 : -1) * 8;
+            const wobble = Math.sin(x * 0.12 + wavePhase * 2) * 5;
+            y = 20 + spikyNoise + wobble + pulseEffect;
+          } 
+          else if (currentScore <= 75) {
+            // Transition: moderate double sine wave
+            y = 20 + Math.sin(x * 0.05 + wavePhase) * 8 + Math.cos(x * 0.12 - wavePhase * 0.8) * 4 + pulseEffect;
+          } 
+          else {
+            // Flow state: smooth pure sine wave
+            y = 20 + Math.sin(x * 0.04 + wavePhase) * 10 + pulseEffect;
+          }
+
+          points.push(`${x === 0 ? 'M' : 'L'} ${x} ${y.toFixed(2)}`);
+        }
+
+        path.setAttribute('d', points.join(' '));
+      }
+
+      requestAnimationFrame(renderWaveAnimation);
+    }
+
+    // Direct kickstart animation
+    renderWaveAnimation();
+
+    function toggleBtn(btn, index) {
+      btn.classList.toggle('active');
+      activeState[index] = !activeState[index];
+      triggerAudioPulse(); // Feedback tactile visual saat tombol dicentang
+      updateRadar();
+      saveData();
+    }
+
+    /* ========================================================
+       4. SUCCESS BURST / SHOCKWAVE EFFECT (100% SCORE)
+       ======================================================== */
+    function triggerSuccessBurst() {
+      const ring = document.getElementById('shockwaveRing');
+      if (ring) {
+        ring.classList.remove('trigger-burst');
+        void ring.offsetWidth; // Reflow untuk mereset animasi CSS
+        ring.classList.add('trigger-burst');
+      }
+      // Haptic feedback untuk perangkat seluler
+      if (navigator.vibrate) {
+        navigator.vibrate([40, 60, 40]);
+      }
+    }
+
+    function updateRadar() {
+      const activeCount = activeState.filter(Boolean).length;
+      const prevScore = currentScore;
+      currentScore = Math.round((activeCount / 8) * 100);
+
+      // Pemicu efek Shockwave jika baru saja mencapai 100%
+      if (currentScore === 100 && prevScore < 100) {
+        triggerSuccessBurst();
+      }
+      
+      const scoreEl = document.getElementById('radarScore');
+      if (scoreEl) {
+        scoreEl.textContent = currentScore + "%";
+        if (currentScore === 100) {
+          scoreEl.style.color = "var(--soft-gold)";
+          scoreEl.style.textShadow = "0 0 25px var(--soft-gold)";
+        } else {
+          scoreEl.style.color = "var(--text-cream)";
+          scoreEl.style.textShadow = "0 0 20px rgba(237, 230, 216, 0.3)";
+        }
+      }
+
+      const pointsStr = basePoints.map((pt, i) => {
+        return activeState[i] ? `${pt[0]},${pt[1]}` : `100,100`;
+      }).join(' ');
+
+      const polygon = document.getElementById('radarPolygon');
+      if (polygon) polygon.setAttribute('points', pointsStr);
+
+      const diagText = document.getElementById('diagText');
+      if (diagText) {
+        if(currentScore === 0) diagText.textContent = "STANDBY (KLIK PEMICU)";
+        else if(currentScore < 50) diagText.textContent = "GESEKAN TINGGI ⚠️";
+        else if(currentScore < 80) diagText.textContent = "SIRKUIT STABIL 📈";
+        else diagText.textContent = "AUTO-PILOT READY 🔥";
+      }
+      
+      updateWaveMeta(currentScore);
+    }
+
+    function updateWaveMeta(score) {
+      const wavePath = document.getElementById('wavePath');
+      const waveStatus = document.getElementById('waveStatus');
+
+      if (!wavePath || !waveStatus) return;
+
+      if (score <= 38) {
+        wavePath.setAttribute('stroke', "var(--accent-rust)");
+        waveStatus.textContent = "FRICTION: HIGH (SPIKED)";
+        waveStatus.style.color = "var(--accent-rust)";
+      } 
+      else if (score <= 75) {
+        wavePath.setAttribute('stroke', "var(--soft-gold)");
+        waveStatus.textContent = "FLOW: MODERATE (TRANSITION)";
+        waveStatus.style.color = "var(--soft-gold)";
+      } 
+      else {
+        wavePath.setAttribute('stroke', "var(--accent-sage)");
+        waveStatus.textContent = "FLOW: OPTIMAL (PURE SINE)";
+        waveStatus.style.color = "var(--accent-sage)";
+      }
+    }
+
+    function openScanModal() {
+      const activeCount = activeState.filter(Boolean).length;
+      const score = Math.round((activeCount / 8) * 100);
+      const habitName = document.getElementById('habitInput').value.trim();
+
+      const modal = document.getElementById('hudModal');
+      const mScore = document.getElementById('mScore');
+      const mTitle = document.getElementById('mTitle');
+      const mDesc = document.getElementById('mDesc');
+
+      mScore.textContent = score + "%";
+      const targetPrefix = habitName ? `Kebiasaan "${habitName}"` : "Kebiasaan ini";
+
+      if(score === 0) {
+        mTitle.textContent = "Radar Belum Mendeteksi Input";
+        mTitle.style.color = "var(--soft-gold)";
+        mDesc.innerHTML = "Aktifkan minimal 1 pemicu di jaring radar untuk memulai kalkulasi potensi kebiasaan.";
+        modal.classList.add('open');
+        return;
+      }
+
+      if(score <= 38) {
+        mTitle.textContent = "Sirkuit Rentan Terputus 🛑";
+        mTitle.style.color = "var(--accent-rust)";
+      } else if(score <= 75) {
+        mTitle.textContent = "Sirkuit Terhubung Sebagian 📈";
+        mTitle.style.color = "var(--soft-gold)";
+      } else if(score < 100) {
+        mTitle.textContent = "Sirkuit Hampir Sempurna ⚡";
+        mTitle.style.color = "var(--accent-sage)";
+      } else {
+        mTitle.textContent = "Sistem Auto-Pilot Aktif 🔥";
+        mTitle.style.color = "var(--accent-sage)";
+      }
+
+      if (score === 100) {
+        mDesc.innerHTML = `Sempurna! Seluruh 4 Hukum Perubahan Perilaku untuk ${targetPrefix.toLowerCase()} terkunci rapat. Otomatisasi berjalan lancar tanpa hambatan!`;
+        modal.classList.add('open');
+        return;
+      }
+
+      const actionItems = [];
+
+      if (!activeState[0]) actionItems.push("<strong style='color:var(--accent-sage)'>[Obvious]</strong> Buat jadwal & lokasi yang spesifik (Intensi Implementasi).");
+      if (!activeState[1]) actionItems.push("<strong style='color:var(--accent-sage)'>[Obvious]</strong> Letakkan pemicu visual langsung di jalur aktivitas harian.");
+      if (!activeState[2]) actionItems.push("<strong style='color:var(--soft-gold)'>[Attractive]</strong> Terapkan <em>Temptation Bundling</em> (gabungkan dengan hal yang disukai).");
+      if (!activeState[3]) actionItems.push("<strong style='color:var(--soft-gold)'>[Attractive]</strong> Cari mitra akuntabilitas atau gabung lingkungan pendukung.");
+      if (!activeState[4]) actionItems.push("<strong style='color:var(--accent-sage)'>[Easy]</strong> Pangkas durasi awal menjadi Aturan 2 Menit untuk menekan gesekan.");
+      if (!activeState[5]) actionItems.push("<strong style='color:var(--accent-sage)'>[Easy]</strong> Siapkan semua peralatan (H-1) sebelum hendak dieksekusi.");
+      if (!activeState[6]) actionItems.push("<strong style='color:var(--accent-rust)'>[Satisfying]</strong> Berikan imbalan instan sesaat setelah aksi selesai.");
+      if (!activeState[7]) actionItems.push("<strong style='color:var(--accent-rust)'>[Satisfying]</strong> Gunakan visual tracker (centang kalender) untuk mengunci kepuasan.");
+
+      let planHTML = `
+        <div style="text-align: left; margin-top: 12px; background: rgba(237, 230, 216, 0.03); padding: 14px; border-radius: 12px; border: 1px solid var(--glass-border);">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--soft-gold); margin-bottom: 10px; letter-spacing: 0.08em; text-transform: uppercase;">
+            ⚡ Action Plan Rekomendasi (${actionItems.length} Celah Terdeteksi):
+          </div>
+          <ul style="padding-left: 18px; font-size: 12px; line-height: 1.6; color: var(--text-warm-gray); display: flex; flex-direction: column; gap: 8px;">
+            ${actionItems.map(item => `<li>${item}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+
+      mDesc.innerHTML = planHTML;
+      modal.classList.add('open');
+    }
+
+    function closeScanModal() {
+      document.getElementById('hudModal').classList.remove('open');
+    }
+
+    // SAFE STORAGE LOAD & SAVE
+    function saveData() {
+      try {
+        const data = {
+          habitName: document.getElementById('habitInput').value,
+          activeState: activeState
+        };
+        localStorage.setItem('habit_glass_radar', JSON.stringify(data));
+      } catch(e) {
+        /* storage blocked safeguard */
+      }
+    }
+
+    function loadData() {
+      try {
+        const saved = localStorage.getItem('habit_glass_radar');
+        if (!saved) return;
+        const data = JSON.parse(saved);
+        if (data.habitName) document.getElementById('habitInput').value = data.habitName;
+        if (Array.isArray(data.activeState)) {
+          activeState = data.activeState;
+          const btns = document.querySelectorAll('.hub-btn');
+          btns.forEach((btn, index) => {
+            if (activeState[index]) btn.classList.add('active');
+            else btn.classList.remove('active');
+          });
+          updateRadar();
+        }
+      } catch(e) {
+        /* storage blocked safeguard */
+      }
+    }
+
+    function resetAudit() {
+      activeState.fill(false);
+      document.getElementById('habitInput').value = '';
+      document.querySelectorAll('.hub-btn').forEach(btn => btn.classList.remove('active'));
+      updateRadar();
+      try { localStorage.removeItem('habit_glass_radar'); } catch(e){}
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
